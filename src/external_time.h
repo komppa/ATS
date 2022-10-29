@@ -5,7 +5,9 @@
 #include <stdio.h>
 #include <time.h>
 #include <math.h>
+#ifndef ARDUINO
 #include <sys/time.h>
+#endif
 #endif
 
 
