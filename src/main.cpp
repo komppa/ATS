@@ -286,7 +286,7 @@ void updateCursor() {
   }
 }
 
-
+#ifndef UNIT_TEST
 void setup() {
   Serial.begin(115200);
   lcd.begin(DISPLAY_WIDTH, 2);
@@ -349,3 +349,4 @@ void loop() {
   }
   
 }
+#endif // Do not compile setup and loop if unit testing
