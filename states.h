@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include "FiniteStateMachine.hpp"
 #include "timers.hpp"
+#include <Arduino.h>
 
 
 void init_state_machine();

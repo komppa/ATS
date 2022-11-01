@@ -21,7 +21,8 @@ FSM sm = FSM(UnknownStart);
 
 
 bool is_grid_up() {
-    return false;
+    int status = digitalRead(A0);
+    return status == 1 ? true : false;
 }
 
 bool is_generator_up() {

@@ -3,6 +3,7 @@
 
 
 #include <stdbool.h>
+#include "external_time.h"
 
 // All these timers are in seconds
 struct Timers {
@@ -33,13 +34,22 @@ enum TimerSelection {
 class Timer {
     private:
         Timers timers;
+        ExternalTime *external_timer;
     public:
-        Timer();
-        int reset_timer(TimerSelection);
-        int update();
-        int get_timer_time(TimerSelection);
-        void set_timer(TimerSelection, bool);
+        Timer(ExternalTime*);
+        virtual int reset_timer(TimerSelection);
+        virtual int update();
+        virtual int get_timer_time(TimerSelection);
+        virtual void set_timer(TimerSelection, bool);
 };
 
+
+class MockTimer: public Timer {
+    public:
+    MOCK_METHOD(int, reset_timer, ());
+    MOCK_METHOD(int, update, ());
+    MOCK_METHOD(int, get_timer_time, ());
+    MOCK_METHOD(void, set_timer, ());
+};
 
 #endif

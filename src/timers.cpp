@@ -1,4 +1,4 @@
-#include "external_time.h"  // For getTime()
+#include "external_time.h"  // For get_time()
 #include "timers.hpp"
 
 
@@ -20,7 +20,7 @@
 // };
 
 
-Timer::Timer() {
+Timer::Timer(ExternalTime *external_timer) {
     this->timers = (Timers){
         .stability_time_active = false,
         .remaining_stability_time = 30,
@@ -36,6 +36,7 @@ Timer::Timer() {
 
         .last_timer_run = 0,
     };
+    this->external_timer = external_timer;
 };
 
 int Timer::get_timer_time(TimerSelection timer) {
@@ -103,8 +104,8 @@ int Timer::reset_timer(TimerSelection timer_selection = ALL) {
 
 int Timer::update(void) {
 
-    if ((unsigned long)(get_time() - this->timers.last_timer_run) > 1000) {
-        this->timers.last_timer_run = get_time();
+    if ((unsigned long)(this->external_timer->get_time() - this->timers.last_timer_run) > 1000) {
+        this->timers.last_timer_run = this->external_timer->get_time();
 
         // Reduce every counter once a second if they are active
         // and they are not already counted all way down

@@ -4,7 +4,7 @@
    Copyright (C) 2020, Konsta Rantakangas.
    Released under the MIT License.
 */
-
+#ifndef UNIT_TEST
 #include <LiquidCrystal.h>
 #include <Keypad.h>
 #include <Arduino.h>
@@ -269,15 +269,6 @@ Writer::set_write_to_row(writeRow new_write_row) {
 auto writer = new Writer();
 
 
-/*
-void Writer::turnOff()
-{
-  this->down = 0;
-  return;
-}
-*/
-
-
 void updateCursor() {
   if (millis() / 250 % 2 == 0 ) {
     lcd.cursor();
@@ -286,7 +277,7 @@ void updateCursor() {
   }
 }
 
-#ifndef UNIT_TEST
+
 void setup() {
   Serial.begin(115200);
   lcd.begin(DISPLAY_WIDTH, 2);
@@ -349,4 +340,6 @@ void loop() {
   }
   
 }
+
+
 #endif // Do not compile setup and loop if unit testing
