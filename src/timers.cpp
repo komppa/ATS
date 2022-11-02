@@ -2,22 +2,23 @@
 #include "timers.hpp"
 
 
-// Default values before they are got i.e. from EEPROM
-// Timers timers = (Timers){
-//     .stability_time_active = false,
-//     .remaining_stability_time = 30,
-//     .intial_stability_time = 30,
+Timer::Timer() {
+    this->timers = (Timers){
+        .stability_time_active = false,
+        .remaining_stability_time = 30,
+        .intial_stability_time = 30,
 
-//     .switching_delay_active = false,
-//     .remaining_switching_delay = 5,
-//     .intial_switching_delay = 5,
+        .switching_delay_active = false,
+        .remaining_switching_delay = 5,
+        .intial_switching_delay = 5,
 
-//     .warm_up_time_active = false,
-//     .remaining_warm_up_time = 30,
-//     .initial_warm_up_time = 30,
+        .warm_up_time_active = false,
+        .remaining_warm_up_time = 30,
+        .initial_warm_up_time = 30,
 
-//     .last_timer_run = 0,
-// };
+        .last_timer_run = 0,
+    };
+}
 
 
 Timer::Timer(ExternalTime *external_timer) {

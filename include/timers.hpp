@@ -36,6 +36,7 @@ class Timer {
         Timers timers;
         ExternalTime *external_timer;
     public:
+        Timer();
         Timer(ExternalTime*);
         virtual int reset_timer(TimerSelection);
         virtual int update();
