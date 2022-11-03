@@ -3,6 +3,7 @@
 #include "timers.hpp"
 #include "external_time.h"
 #include "maint.h"
+#include "hardware.h"
 
 
 using namespace testing;
@@ -10,11 +11,14 @@ using namespace testing;
 
 TEST(timer, update_stability_time_when_active_and_remaining_over_zero) { 
 
-    MockExternalTime external_time;
-    Timer timer(&external_time);
+    MockHardware hardware;
+    Timer timer(&hardware);
     int stability_time;
 
-    ON_CALL(external_time, get_time()).WillByDefault(Return(0));
+    // ON_CALL(hardware, millis()).WillByDefault(Return(0));
+    // ON_CALL(external_time, get_time()).WillByDefault(Return(0));
+    // MOCK_MILLIS(external_time, 0);
+    MOCK_MILLIS(0);
 
     timer.reset_timer(STABILITY_TIME);
     timer.enable_timer(STABILITY_TIME, true);
@@ -25,8 +29,10 @@ TEST(timer, update_stability_time_when_active_and_remaining_over_zero) {
     EXPECT_EQ(stability_time, 30);
 
 
-    ON_CALL(external_time, get_time()).WillByDefault(Return(1001));
-
+    // ON_CALL(hardware, millis()).WillByDefault(Return(1001));
+    // ON_CALL(external_time, get_time()).WillByDefault(Return(1001));
+    // MOCK_MILLIS(external_time, 1001);
+    MOCK_MILLIS(1001);
     timer.update();
 
     stability_time = timer.get_remaining_time(STABILITY_TIME);
@@ -36,11 +42,11 @@ TEST(timer, update_stability_time_when_active_and_remaining_over_zero) {
 
 TEST(timer, update_stability_time_when_inactive_and_remaining_over_zero) { 
 
-    MockExternalTime external_time;
-    Timer timer(&external_time);
+    MockHardware hardware;
+    Timer timer(&hardware);
     int stability_time;
 
-    ON_CALL(external_time, get_time()).WillByDefault(Return(0));
+    MOCK_MILLIS(0);
 
     timer.reset_timer(STABILITY_TIME);
     timer.enable_timer(STABILITY_TIME, true);
@@ -51,7 +57,7 @@ TEST(timer, update_stability_time_when_inactive_and_remaining_over_zero) {
     EXPECT_EQ(stability_time, 30);
 
 
-    ON_CALL(external_time, get_time()).WillByDefault(Return(1001));
+    MOCK_MILLIS(1001);
 
     timer.update();
 
@@ -62,8 +68,8 @@ TEST(timer, update_stability_time_when_inactive_and_remaining_over_zero) {
 
 TEST(timer, update_stability_time_when_active_and_remaining_zero) {
 
-    MockExternalTime external_time;
-    Timer timer(&external_time);
+    MockHardware hardware;
+    Timer timer(&hardware);
     int stability_time;
 
     timer.reset_timer(STABILITY_TIME);
@@ -76,7 +82,7 @@ TEST(timer, update_stability_time_when_active_and_remaining_zero) {
     stability_time = timer.get_remaining_time(STABILITY_TIME);
     EXPECT_EQ(stability_time, 0);
 
-    ON_CALL(external_time, get_time()).WillByDefault(Return(1001)); // "Wait" over a second
+    MOCK_MILLIS(1001);  // "Wait" over a second
 
     timer.update();
 
@@ -87,9 +93,9 @@ TEST(timer, update_stability_time_when_active_and_remaining_zero) {
 }
 
 TEST(timer, update_stability_time_when_inactive_and_remaining_zero) {
-
-    MockExternalTime external_time;
-    Timer timer(&external_time);
+    
+    MockHardware hardware;
+    Timer timer(&hardware);
     int stability_time;
 
     timer.reset_timer(STABILITY_TIME);
@@ -102,7 +108,7 @@ TEST(timer, update_stability_time_when_inactive_and_remaining_zero) {
     stability_time = timer.get_remaining_time(STABILITY_TIME);
     EXPECT_EQ(stability_time, 0);
 
-    ON_CALL(external_time, get_time()).WillByDefault(Return(1001)); // "Wait" over a second
+    MOCK_MILLIS(1001);  // "Wait" over a second
 
     timer.update();
 
@@ -117,8 +123,8 @@ TEST(timer, update_does_not_reset_flags_on_remaining_zero) {
     // TEST TODO there is no way to check whether timer is active * 
     GTEST_SKIP();
 
-    MockExternalTime external_time;
-    Timer timer(&external_time);
+    MockHardware hardware;
+    Timer timer(&hardware);
     int stability_time;
 
     timer.reset_timer(STABILITY_TIME);
@@ -131,7 +137,7 @@ TEST(timer, update_does_not_reset_flags_on_remaining_zero) {
     stability_time = timer.get_remaining_time(STABILITY_TIME);
     EXPECT_EQ(stability_time, 0);
 
-    ON_CALL(external_time, get_time()).WillByDefault(Return(1001)); // "Wait" over a second
+    MOCK_MILLIS(1001);
 
     timer.update();
 

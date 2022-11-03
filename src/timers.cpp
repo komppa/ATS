@@ -20,7 +20,7 @@ Timer::Timer() {
     };
 }
 
-Timer::Timer(ExternalTime *external_timer) {
+Timer::Timer(Hardware *hardware) {
     this->timers = (Timers){
         .stability_time_active = false,
         .remaining_stability_time = 30,
@@ -36,7 +36,7 @@ Timer::Timer(ExternalTime *external_timer) {
 
         .last_timer_run = 0,
     };
-    this->external_timer = external_timer;
+    this->hardware = hardware;
 };
 
 int Timer::get_remaining_time(TimerSelection timer) {
@@ -147,8 +147,8 @@ int Timer::reset_timer(TimerSelection timer_selection = ALL) {
 */
 int Timer::update(void) {
 
-    if ((unsigned long)(this->external_timer->get_time() - this->timers.last_timer_run) > 1000) {
-        this->timers.last_timer_run = this->external_timer->get_time();
+    if ((unsigned long)(this->hardware->millis() - this->timers.last_timer_run) > 1000) {
+        this->timers.last_timer_run = this->hardware->millis();
 
         // Reduce every counter once a second if they are active
         // and they are not already counted all way down

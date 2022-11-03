@@ -3,6 +3,7 @@
 #include "timers.hpp"
 #include "external_time.h"
 #include "maint.h"
+#include "hardware.h"
 
 
 using namespace testing;
@@ -10,12 +11,12 @@ using namespace testing;
 
 TEST(timer, enable_counts_stability_down) { 
 
-    MockExternalTime external_time;
-    Timer timer(&external_time);
+    MockHardware hardware;
+    Timer timer(&hardware);
     int remaining_time;
     int initial_time;
 
-    ON_CALL(external_time, get_time()).WillByDefault(Return(0));
+    MOCK_MILLIS(0);
 
     timer.reset_timer(STABILITY_TIME);
 
@@ -25,7 +26,7 @@ TEST(timer, enable_counts_stability_down) {
     timer.update();
     
     // Wait a second
-    ON_CALL(external_time, get_time()).WillByDefault(Return(1001));
+    MOCK_MILLIS(1001);
     timer.update();
 
     remaining_time = timer.get_remaining_time(STABILITY_TIME);
@@ -38,12 +39,12 @@ TEST(timer, enable_counts_stability_down) {
 
 TEST(timer, disabled_do_not_count_down) { 
 
-    MockExternalTime external_time;
-    Timer timer(&external_time);
+    MockHardware hardware;
+    Timer timer(&hardware);
     int remaining_time;
     int initial_time;
 
-    ON_CALL(external_time, get_time()).WillByDefault(Return(0));
+    MOCK_MILLIS(0);
 
     timer.reset_timer(STABILITY_TIME);
 
@@ -53,7 +54,7 @@ TEST(timer, disabled_do_not_count_down) {
     timer.update();
     
     // Wait a second
-    ON_CALL(external_time, get_time()).WillByDefault(Return(1001));
+    MOCK_MILLIS(1001);
     timer.update();
 
     remaining_time = timer.get_remaining_time(STABILITY_TIME);

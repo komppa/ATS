@@ -3,7 +3,7 @@
 
 
 #include <stdbool.h>
-#include "external_time.h"
+#include "hardware.h"
 
 // All these timers are in seconds
 struct Timers {
@@ -33,10 +33,10 @@ enum TimerSelection {
 class Timer {
     private:
         Timers timers;
-        ExternalTime *external_timer;
+        Hardware *hardware;
     public:
         Timer();
-        Timer(ExternalTime*);
+        Timer(Hardware*);
         virtual void set_timer(TimerSelection, int);
         virtual int reset_timer(TimerSelection);
         virtual int update();
