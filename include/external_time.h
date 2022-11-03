@@ -13,7 +13,6 @@ class ExternalTime {
 };
 
 
-
 class MockExternalTime: public ExternalTime {
 public:
     MOCK_METHOD(int, get_time, ());
