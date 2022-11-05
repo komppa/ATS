@@ -28,7 +28,9 @@
 */
 
 #include "FiniteStateMachine.hpp"
-#include "external_time.h"
+#include "hardware.h"
+
+Hardware hardware;
 
 //FINITE STATE
 State::State( void (*updateFunction)() ){
@@ -91,7 +93,7 @@ FiniteStateMachine& FiniteStateMachine::update() {
 FiniteStateMachine& FiniteStateMachine::transitionTo(State& state){
 	nextState = &state;
 	// stateChangeTime = millis();
-	stateChangeTime = get_time();
+	stateChangeTime = hardware.millis();
 	return *this;
 }
 
@@ -100,7 +102,7 @@ FiniteStateMachine& FiniteStateMachine::immediateTransitionTo(State& state){
 	currentState = nextState = &state;
 	currentState->enter();
 	// stateChangeTime = millis();
-	stateChangeTime = get_time();
+	stateChangeTime = hardware.millis();
 	return *this;
 }
 
@@ -121,6 +123,6 @@ bool FiniteStateMachine::isInState( State &state ) const {
 
 unsigned long FiniteStateMachine::timeInCurrentState() { 
 	// millis() - stateChangeTime; 
-	return get_time() - stateChangeTime; 
+	return hardware.millis() - stateChangeTime; 
 }
 //END FINITE STATE MACHINE

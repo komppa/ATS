@@ -27,6 +27,16 @@ int Hardware::digitalRead(uint8_t pin) {
     #endif
 }
 
+int Hardware::getVoltageAC() {
+    #ifdef ARDUINO
+    ZMPT101B z = ZMPT101B(54);
+    float v = z.getVoltageAC() * 10;
+    return floor(v);
+    #else
+    return -1;
+    #endif
+}
+
 // TODO digitalRead
 // TODO digitalWrite
 // TODO analogRead

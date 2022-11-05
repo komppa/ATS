@@ -1,5 +1,6 @@
 #include "states.h"
 #include <stdio.h>
+#include "hardware.h"
 
 
 Timer timer;
@@ -18,23 +19,41 @@ State SwitchDelayToGrid = State(enterSwitchDelayToGrid, updateSwitchDelayToGrid,
 
 
 FSM sm = FSM(UnknownStart);
+Hardware hardware;
 
 
 bool is_grid_up() {
-    int status = digitalRead(A0);
-    return status == 1 ? true : false;
+    // TODO analogRead bc of voltage module
+    // return hardware.digitalRead(PIN_CONTACTOR_GRID);
 }
 
 bool is_generator_up() {
-    return false;
+    // TODO analogRead bc of voltage module
+    // return hardware.digitalRead(PIN_CONTACTOR_GENERATOR);
 }
 
 void set_grid_contactor(bool status) {
-    // TODO release generator contactor in any case, wait and switch gird contactor to match 'status'
+    // It is so critical action to ensure that the other contactor is off when
+    // switching grid on, that other contactor is switched off before grid is kicked in
+
+    // Grid is being activated, switch generator off before that
+    if (status == true) {
+        hardware.digitalWrite(PIN_CONTACTOR_GENERATOR, false);
+        delay(100);
+    }
+
+    hardware.digitalWrite(PIN_CONTACTOR_GRID, status);
 }
 
 void set_generator_contactor(bool status) {
-    // TODO release grid contactor in any case, wait and switch generator contactor to match 'status'
+    // Generator is being activated, switch grid off before that
+    // and do a little guard wait
+    if (status == true) {
+        hardware.digitalWrite(PIN_CONTACTOR_GRID, false);
+        delay(100);
+    }
+
+    hardware.digitalWrite(PIN_CONTACTOR_GENERATOR, status);
 }
 
 

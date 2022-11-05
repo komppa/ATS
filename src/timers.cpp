@@ -1,4 +1,3 @@
-#include "external_time.h"  // For get_time()
 #include "timers.hpp"
 
 

@@ -45,7 +45,7 @@ class Timer {
         virtual void enable_timer(TimerSelection, bool);
 };
 
-
+#ifdef UNIT_TEST
 class MockTimer: public Timer {
     public:
     MOCK_METHOD(int, set_timer, ());
@@ -55,5 +55,6 @@ class MockTimer: public Timer {
     MOCK_METHOD(int, get_initial_time, ());
     MOCK_METHOD(void, enable_timer, ());
 };
+#endif // UNIT_TEST
 
 #endif
