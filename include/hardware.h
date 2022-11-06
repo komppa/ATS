@@ -5,7 +5,7 @@
 #include "ZMPT101B.h"
 
 // If building release for Arduino, include it to be used by this class
-#ifdef ARDUINO
+#ifndef UNIT_TEST
 #include <Arduino.h>
 #endif
 
@@ -50,8 +50,9 @@ class Hardware {
         virtual unsigned long millis();
         virtual void digitalWrite(uint8_t pin, uint8_t val);
         virtual int digitalRead(uint8_t pin);
+        virtual void delay(unsigned long ms);
         // Voltage sensor to be able to mocked
-        virtual int getVoltageAC();
+        virtual int getVoltageAC(uint8_t pin);
 };
 
 #ifdef UNIT_TEST
@@ -61,8 +62,9 @@ class MockHardware: public Hardware {
         MOCK_METHOD(unsigned long, millis, ());
         MOCK_METHOD(void, digitalWrite, (uint8_t, uint8_t));
         MOCK_METHOD(int, digitalRead, (uint8_t));
+        MOCK_METHOD(void, delay, (unsigned long));
         // Voltage sensor
-        MOCK_METHOD(int, getVoltageAC, ());
+        MOCK_METHOD(int, getVoltageAC, (uint8_t));
 };
 #endif  // UNIT_TEST
 

@@ -4,17 +4,32 @@
 #include <stdbool.h>
 #include "FiniteStateMachine.hpp"
 #include "timers.hpp"
+#ifndef UNIT_TEST
 #include <Arduino.h>
+#endif
 
+
+// #ifdef UNIT_TEST
+extern State UnknownStart;
+extern State Normal;
+extern State Stability;
+extern State WaitGen;
+extern State WarmUp;
+extern State SwitchDelayToGen;
+extern State SwitchToGen;
+extern State DetachGen;
+extern State Normal2;
+extern State SwitchDelayToGrid;
+// #endif
 
 void init_state_machine();
 
 
 // Helpers
-bool isGridUp();
-bool isGeneratorUp();
-void setGridContactor(bool status);
-void setGeneratorContactor(bool status);
+bool is_grid_up();
+bool is_generator_up();
+void set_grid_contactor(bool status);
+void set_generator_contactor(bool status);
 
 
 // States

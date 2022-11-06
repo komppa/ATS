@@ -32,6 +32,7 @@
 #ifndef FINITESTATEMACHINE_H
 #define FINITESTATEMACHINE_H
 
+#include "hardware.h"
 
 // #include <Arduino.h> // #include <WProgram.h>
 

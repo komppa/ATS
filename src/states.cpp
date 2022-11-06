@@ -1,7 +1,7 @@
 #include "states.h"
 #include <stdio.h>
 #include "hardware.h"
-
+#include "settings.h"
 
 Timer timer;
 
@@ -23,13 +23,23 @@ Hardware hardware;
 
 
 bool is_grid_up() {
-    // TODO analogRead bc of voltage module
-    // return hardware.digitalRead(PIN_CONTACTOR_GRID);
+    int grid_voltage = hardware.getVoltageAC(PIN_VOLTAGE_GRID);
+    if (grid_voltage < SETTING_MIN_VOLTAGE_THRESHOLD)
+    {
+        return false;
+    }
+    
+    return true;
 }
 
 bool is_generator_up() {
-    // TODO analogRead bc of voltage module
-    // return hardware.digitalRead(PIN_CONTACTOR_GENERATOR);
+    int grid_voltage = hardware.getVoltageAC(PIN_VOLTAGE_GRID);
+    if (grid_voltage < SETTING_MIN_VOLTAGE_THRESHOLD)
+    {
+        return false;
+    }
+    
+    return true;
 }
 
 void set_grid_contactor(bool status) {
@@ -39,7 +49,7 @@ void set_grid_contactor(bool status) {
     // Grid is being activated, switch generator off before that
     if (status == true) {
         hardware.digitalWrite(PIN_CONTACTOR_GENERATOR, false);
-        delay(100);
+        hardware.delay(100);
     }
 
     hardware.digitalWrite(PIN_CONTACTOR_GRID, status);
@@ -50,7 +60,7 @@ void set_generator_contactor(bool status) {
     // and do a little guard wait
     if (status == true) {
         hardware.digitalWrite(PIN_CONTACTOR_GRID, false);
-        delay(100);
+        hardware.delay(100);
     }
 
     hardware.digitalWrite(PIN_CONTACTOR_GENERATOR, status);
@@ -131,12 +141,12 @@ void enterStability() {
 void updateStability() {
 
     // Stability time counted all down to zero and grid still is not up
-    if (timer.get_timer_time(STABILITY_TIME) == 0 && is_grid_up() == false) {
+    if (timer.get_remaining_time(STABILITY_TIME) == 0 && is_grid_up() == false) {
         sm.transitionTo(WaitGen);
     }
 
     if (
-        timer.get_timer_time(STABILITY_TIME) == 0 &&
+        timer.get_remaining_time(STABILITY_TIME) == 0 &&
         is_grid_up() == true &&
         is_generator_up() == false
     ) {
@@ -146,7 +156,7 @@ void updateStability() {
     if (
         is_grid_up() == true &&
         is_generator_up() == true &&
-        timer.get_timer_time(STABILITY_TIME) == 0
+        timer.get_remaining_time(STABILITY_TIME) == 0
     ) {
         sm.transitionTo(SwitchDelayToGrid);
     }
@@ -195,7 +205,7 @@ void enterWarmUp() {
 }
 
 void updateWarmUp() {
-    if (timer.get_timer_time(WARM_UP_TIME) == 0) {
+    if (timer.get_remaining_time(WARM_UP_TIME) == 0) {
         sm.transitionTo(SwitchDelayToGen);
     }
 }
@@ -220,7 +230,7 @@ void enterSwitchDelayToGen() {
 
 void updateSwitchDelayToGen() {
 
-    if (timer.get_timer_time(SWITCHING_DELAY) == 0) {
+    if (timer.get_remaining_time(SWITCHING_DELAY) == 0) {
         sm.transitionTo(SwitchToGen);
     }
 
@@ -313,7 +323,7 @@ void updateSwitchDelayToGrid() {
     if (
         is_grid_up() == true &&
         is_generator_up() == true &&
-        timer.get_timer_time(STABILITY_TIME) == 0
+        timer.get_remaining_time(STABILITY_TIME) == 0
     ) {
         sm.transitionTo(Normal);
     }

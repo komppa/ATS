@@ -28,9 +28,9 @@
 */
 
 #include "FiniteStateMachine.hpp"
-#include "hardware.h"
 
-Hardware hardware;
+// Hardware hardware;
+extern Hardware hardware;
 
 //FINITE STATE
 State::State( void (*updateFunction)() ){

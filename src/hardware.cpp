@@ -27,9 +27,21 @@ int Hardware::digitalRead(uint8_t pin) {
     #endif
 }
 
-int Hardware::getVoltageAC() {
+/**
+ * Waits using built-in delay function call.
+ * Does not wait if native environment.
+*/
+void Hardware::delay(unsigned long ms) {
     #ifdef ARDUINO
-    ZMPT101B z = ZMPT101B(54);
+    // delay(ms);
+    #endif
+    int i = 0;
+    i++;
+}
+
+int Hardware::getVoltageAC(uint8_t pin) {
+    #ifdef ARDUINO
+    ZMPT101B z = ZMPT101B(pin);
     float v = z.getVoltageAC() * 10;
     return floor(v);
     #else
