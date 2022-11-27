@@ -39,7 +39,8 @@ State::State( void (*updateFunction)() ){
 	userExit = 0;
 }
 
-State::State( void (*enterFunction)(), void (*updateFunction)(), void (*exitFunction)() ){
+State::State( string stateName, void (*enterFunction)(), void (*updateFunction)(), void (*exitFunction)() ){
+	this->stateName = stateName;
 	userEnter = enterFunction;
 	userUpdate = updateFunction;
 	userExit = exitFunction;
@@ -64,6 +65,10 @@ void State::exit(){
 	if (userExit){
 		userExit();
 	}
+}
+
+string State::getStateName() {
+	return this->stateName;
 }
 //END FINITE STATE
 

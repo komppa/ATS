@@ -33,6 +33,9 @@
 #define FINITESTATEMACHINE_H
 
 #include "hardware.h"
+#include <string>
+
+using namespace std;
 
 // #include <Arduino.h> // #include <WProgram.h>
 
@@ -46,15 +49,15 @@
 class State {
 	public:
 		State( void (*updateFunction)() );
-		State( void (*enterFunction)(), void (*updateFunction)(), void (*exitFunction)() );
-		//State( byte newId, void (*enterFunction)(), void (*updateFunction)(), void (*exitFunction)() );
-		
-		//void getId();
+		State( string stateName, void (*enterFunction)(), void (*updateFunction)(), void (*exitFunction)() );
+
 		void enter();
 		void update();
 		void exit();
+
+		string getStateName();
 	private:
-		//byte id;
+		string stateName;
 		void (*userEnter)();
 		void (*userUpdate)();
 		void (*userExit)();

@@ -8,19 +8,9 @@
 #include <Arduino.h>
 #endif
 
+#include <string>
 
-// #ifdef UNIT_TEST
-extern State UnknownStart;
-extern State Normal;
-extern State Stability;
-extern State WaitGen;
-extern State WarmUp;
-extern State SwitchDelayToGen;
-extern State SwitchToGen;
-extern State DetachGen;
-extern State Normal2;
-extern State SwitchDelayToGrid;
-// #endif
+using namespace std;
 
 void init_state_machine();
 

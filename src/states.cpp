@@ -6,16 +6,16 @@
 Timer timer;
 
 
-State UnknownStart = State(enterUnknownStart, updateUnknownStart, exitUnknownStart);
-State Normal = State(enterNormal, updateNormal, exitNormal);
-State Stability = State(enterStability, updateStability, exitStability);
-State WaitGen = State(enterWaitGen, updateWaitGen, exitWaitGen);
-State WarmUp = State(enterWarmUp, updateWarmUp, exitWarmUp);
-State SwitchDelayToGen = State(enterSwitchDelayToGen, updateSwitchDelayToGen, exitSwitchDelayToGen);
-State SwitchToGen = State(enterSwitchToGen, updateSwitchToGen, exitSwitchToGen);
-State DetachGen = State(enterDetachGen, updateDetachGen, exitDetachGen);
-State Normal2 = State(enterNormal2, updateNormal2, exitNormal2);
-State SwitchDelayToGrid = State(enterSwitchDelayToGrid, updateSwitchDelayToGrid, exitSwitchDelayToGrid);
+State UnknownStart = State("UnknownStart", enterUnknownStart, updateUnknownStart, exitUnknownStart);
+State Normal = State("Normal", enterNormal, updateNormal, exitNormal);
+State Stability = State("Stability", enterStability, updateStability, exitStability);
+State WaitGen = State("WaitGen", enterWaitGen, updateWaitGen, exitWaitGen);
+State WarmUp = State("WarmUp", enterWarmUp, updateWarmUp, exitWarmUp);
+State SwitchDelayToGen = State("SwitchDelayToGen", enterSwitchDelayToGen, updateSwitchDelayToGen, exitSwitchDelayToGen);
+State SwitchToGen = State("SwitchToGen", enterSwitchToGen, updateSwitchToGen, exitSwitchToGen);
+State DetachGen = State("DetachGen", enterDetachGen, updateDetachGen, exitDetachGen);
+State Normal2 = State("Normal2", enterNormal2, updateNormal2, exitNormal2);
+State SwitchDelayToGrid = State("SwitchDelayToGrid", enterSwitchDelayToGrid, updateSwitchDelayToGrid, exitSwitchDelayToGrid);
 
 
 FSM sm = FSM(UnknownStart);
