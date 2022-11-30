@@ -9,7 +9,7 @@
 using namespace testing;
 
 
-// #ifdef UNIT_TEST
+#ifdef UNIT_TEST
 extern State UnknownStart;
 extern State Normal;
 extern State Stability;
@@ -20,7 +20,7 @@ extern State SwitchToGen;
 extern State DetachGen;
 extern State Normal2;
 extern State SwitchDelayToGrid;
-// #endif
+#endif
 
 
 
