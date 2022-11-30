@@ -2,7 +2,7 @@ name: Test
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "**" ]
   workflow_dispatch:
 
 jobs:
@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Build docker image
         run: |
-          docker build --no-cache -t 5bcf4108 .
+          docker build -t 5bcf4108 .
       - name: Start container and test
         run: |
           docker run -v /tmp/5bcf4108_output:/home/ci/project/output --rm 5bcf4108
@@ -21,3 +21,4 @@ jobs:
         if: always() # always run even if the previous step fails
         with:
           report_paths: '/tmp/5bcf4108_output/pio-test-report-ATS-*.xml'
+          github_token: ${{secrets.GITHUB_TOKEN}}

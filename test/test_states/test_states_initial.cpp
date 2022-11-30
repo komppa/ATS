@@ -30,7 +30,7 @@ TEST(states, check_initial_state) {
 
     EXPECT_EQ(
         sm.getCurrentState().getStateName(),
-        "UnknownStart"
+        "Start"
     );
 
 }
