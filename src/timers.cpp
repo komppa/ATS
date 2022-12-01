@@ -146,7 +146,7 @@ int Timer::reset_timer(TimerSelection timer_selection = ALL) {
 */
 int Timer::update(void) {
 
-    if ((unsigned long)(this->hardware->millis() - this->timers.last_timer_run) > 1000) {
+    if ((unsigned long)(this->hardware->millis() - this->timers.last_timer_run) >= 1000) {
         this->timers.last_timer_run = this->hardware->millis();
 
         // Reduce every counter once a second if they are active

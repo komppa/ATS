@@ -15,6 +15,13 @@
 
 #define UNKNOWN -1
 #define MOCK_MILLIS(ret_val) (ON_CALL(hardware, millis()).WillByDefault(Return(ret_val)))
+#define MOCK_FAST_MILLIS(timer_mock, ff_val)                        \
+    for (int i = 1; i <= ff_val; i++) {                             \
+        if (i % 1000 == 0) {                                        \
+            ON_CALL(hardware, millis()).WillByDefault(Return(i));   \
+            timer_mock.update();                                         \
+        }                                                           \
+    }
 
 // Pin definitions
 // Contactors
