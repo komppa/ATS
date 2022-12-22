@@ -32,7 +32,7 @@
 #ifndef FINITESTATEMACHINE_H
 #define FINITESTATEMACHINE_H
 
-#include "hardware.h"
+// #include "hardware.h"
 #include <string>
 
 using namespace std;
@@ -45,21 +45,24 @@ using namespace std;
 
 #define FSM FiniteStateMachine
 
+class State;
+class FiniteStateMachine;
+
 //define the functionality of the states
 class State {
 	public:
-		State( void (*updateFunction)() );
-		State( string stateName, void (*enterFunction)(), void (*updateFunction)(), void (*exitFunction)() );
+		// State( void (*updateFunction)() );
+		State( string stateName, void (*enterFunction)(), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)() );
 
 		void enter();
-		void update();
+		void update(FiniteStateMachine *fsm);
 		void exit();
 
 		string getStateName();
 	private:
 		string stateName;
 		void (*userEnter)();
-		void (*userUpdate)();
+		void (*userUpdate)(FiniteStateMachine*);
 		void (*userExit)();
 };
 

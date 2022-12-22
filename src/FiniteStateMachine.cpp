@@ -30,16 +30,15 @@
 #include "FiniteStateMachine.hpp"
 
 // Hardware hardware;
-extern Hardware hardware;
 
 //FINITE STATE
-State::State( void (*updateFunction)() ){
-	userEnter = 0;
-	userUpdate = updateFunction;
-	userExit = 0;
-}
+// State::State( void (*updateFunction)(FiniteStateMachine *fsm) ){
+// 	userEnter = 0;
+// 	userUpdate = updateFunction;
+// 	userExit = 0;
+// }
 
-State::State( string stateName, void (*enterFunction)(), void (*updateFunction)(), void (*exitFunction)() ){
+State::State( string stateName, void (*enterFunction)(), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)() ){
 	this->stateName = stateName;
 	userEnter = enterFunction;
 	userUpdate = updateFunction;
@@ -54,9 +53,9 @@ void State::enter(){
 }
 
 //what to do when this state updates
-void State::update(){
+void State::update(FiniteStateMachine *fsm){
 	if (userUpdate){
-		userUpdate();
+		userUpdate(fsm);
 	}
 }
 
@@ -90,7 +89,7 @@ FiniteStateMachine& FiniteStateMachine::update() {
 		if (currentState != nextState){
 			immediateTransitionTo(*nextState);
 		}
-		currentState->update();
+		currentState->update(this);
 	}
 	return *this;
 }
@@ -128,6 +127,6 @@ bool FiniteStateMachine::isInState( State &state ) const {
 
 unsigned long FiniteStateMachine::timeInCurrentState() { 
 	// millis() - stateChangeTime; 
-	return hardware.millis() - stateChangeTime; 
+	return hardware.millis() - stateChangeTime;
 }
 //END FINITE STATE MACHINE
