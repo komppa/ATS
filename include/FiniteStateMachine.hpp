@@ -49,26 +49,26 @@ class State;
 class FiniteStateMachine;
 
 struct Deps {
-    int hardware;
-	// Timer timer;
+    Hardware hardware;
+	Timer timer;
 };
 
 //define the functionality of the states
 class State {
 	public:
 		// State( void (*updateFunction)() );
-		State( string stateName, void (*enterFunction)(), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)() );
+		State( string stateName, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) );
 
-		void enter();
+		void enter(FiniteStateMachine *fsm);
 		void update(FiniteStateMachine *fsm);
-		void exit();
+		void exit(FiniteStateMachine *fsm);
 
 		string getStateName();
 	private:
 		string stateName;
-		void (*userEnter)();
+		void (*userEnter)(FiniteStateMachine*);
 		void (*userUpdate)(FiniteStateMachine*);
-		void (*userExit)();
+		void (*userExit)(FiniteStateMachine*);
 };
 
 //define the finite state machine functionality

@@ -29,16 +29,7 @@
 
 #include "FiniteStateMachine.hpp"
 
-// Hardware hardware;
-
-//FINITE STATE
-// State::State( void (*updateFunction)(FiniteStateMachine *fsm) ){
-// 	userEnter = 0;
-// 	userUpdate = updateFunction;
-// 	userExit = 0;
-// }
-
-State::State( string stateName, void (*enterFunction)(), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)() ){
+State::State( string stateName, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) ){
 	this->stateName = stateName;
 	userEnter = enterFunction;
 	userUpdate = updateFunction;
@@ -46,9 +37,9 @@ State::State( string stateName, void (*enterFunction)(), void (*updateFunction)(
 }
 
 //what to do when entering this state
-void State::enter(){
+void State::enter(FiniteStateMachine *fsm){
 	if (userEnter){
-		userEnter();
+		userEnter(fsm);
 	}
 }
 
@@ -60,9 +51,9 @@ void State::update(FiniteStateMachine *fsm){
 }
 
 //what to do when exiting this state
-void State::exit(){
+void State::exit(FiniteStateMachine *fsm){
 	if (userExit){
-		userExit();
+		userExit(fsm);
 	}
 }
 
@@ -77,14 +68,14 @@ FiniteStateMachine::FiniteStateMachine(State& current, Deps *deps){
 	this->deps = deps;
 	needToTriggerEnter = true;
 	currentState = nextState = &current;
-	stateChangeTime = 0;
+	// stateChangeTime = 0;
 }
 
 FiniteStateMachine& FiniteStateMachine::update() {
 	//simulate a transition to the first state
 	//this only happens the first time update is called
 	if (needToTriggerEnter) { 
-		currentState->enter();
+		currentState->enter(this);
 		needToTriggerEnter = false;
 	} else {
 		if (currentState != nextState){
@@ -98,16 +89,16 @@ FiniteStateMachine& FiniteStateMachine::update() {
 FiniteStateMachine& FiniteStateMachine::transitionTo(State& state){
 	nextState = &state;
 	// stateChangeTime = millis();
-	stateChangeTime = hardware.millis();
+	stateChangeTime = this->deps->hardware.millis();
 	return *this;
 }
 
 FiniteStateMachine& FiniteStateMachine::immediateTransitionTo(State& state){
-	currentState->exit();
+	currentState->exit(this);
 	currentState = nextState = &state;
-	currentState->enter();
+	currentState->enter(this);
 	// stateChangeTime = millis();
-	stateChangeTime = hardware.millis();
+	stateChangeTime = this->deps->hardware.millis();
 	return *this;
 }
 
@@ -132,6 +123,6 @@ bool FiniteStateMachine::isInState( State &state ) const {
 
 unsigned long FiniteStateMachine::timeInCurrentState() { 
 	// millis() - stateChangeTime; 
-	return hardware.millis() - stateChangeTime;
+	return this->deps->hardware.millis() - stateChangeTime;
 }
 //END FINITE STATE MACHINE
