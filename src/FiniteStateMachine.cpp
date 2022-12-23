@@ -73,7 +73,8 @@ string State::getStateName() {
 
 
 //FINITE STATE MACHINE
-FiniteStateMachine::FiniteStateMachine(State& current){
+FiniteStateMachine::FiniteStateMachine(State& current, Deps *deps){
+	this->deps = deps;
 	needToTriggerEnter = true;
 	currentState = nextState = &current;
 	stateChangeTime = 0;
@@ -108,6 +109,10 @@ FiniteStateMachine& FiniteStateMachine::immediateTransitionTo(State& state){
 	// stateChangeTime = millis();
 	stateChangeTime = hardware.millis();
 	return *this;
+}
+
+Deps* FiniteStateMachine::getDeps() {
+	return this->deps;
 }
 
 //return the current state

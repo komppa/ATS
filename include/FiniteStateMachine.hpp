@@ -48,6 +48,11 @@ using namespace std;
 class State;
 class FiniteStateMachine;
 
+struct Deps {
+    int hardware;
+	// Timer timer;
+};
+
 //define the functionality of the states
 class State {
 	public:
@@ -69,13 +74,17 @@ class State {
 //define the finite state machine functionality
 class FiniteStateMachine {
 	public:
-		FiniteStateMachine(State& current);
+		FiniteStateMachine(State& current, Deps *deps);
 		
 		FiniteStateMachine& update();
 		FiniteStateMachine& transitionTo( State& state );
 		FiniteStateMachine& immediateTransitionTo( State& state );
 		
 		State& getCurrentState();
+		Deps* getDeps();
+
+		Deps *deps;
+
 		/// boolean isInState( State &state ) const;
     bool isInState( State &state ) const;
 		
