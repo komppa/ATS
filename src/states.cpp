@@ -20,15 +20,15 @@ State SwitchDelayToGrid = State("SwitchDelayToGrid", &enterSwitchDelayToGrid, &u
 
 
 
-Hardware hardware;
-Timer timer;
-Deps deps = {
-    .hardware = hardware,
-    .timer = timer
-};
+// Hardware hardware;
+// Timer timer;
+// Deps deps = {
+//     .hardware = &hardware,
+//     .timer = &timer
+// };
 
 
-FSM sm = FSM(UnknownStart, &deps);
+// FSM sm = FSM(UnknownStart, &deps);
 
 
 bool is_grid_up(Hardware *h) {
@@ -85,7 +85,7 @@ void set_generator_contactor(Hardware *h, bool status) {
 // This 'UNKNOWN_START'-state is used as a setup. 
 // This is why timers are reseted here
 void enterUnknownStart(FSM *sm) {
-    sm->deps->timer.reset_timer(ALL);
+    sm->deps->timer->reset_timer(ALL);
     sm->transitionTo(Normal);
 }
 
@@ -107,8 +107,8 @@ void enterNormal(FSM *sm) {
     printf("@enterNormal\n");
 
     // Init contactor states 
-    set_generator_contactor(&sm->deps->hardware, false);
-    set_grid_contactor(&sm->deps->hardware, true);
+    set_generator_contactor(sm->deps->hardware, false);
+    set_grid_contactor(sm->deps->hardware, true);
     // TODO LOW gen_stop
 
 }
@@ -117,12 +117,12 @@ void updateNormal(FSM *sm) {
 
 
     // Did grid went down?
-    if (is_grid_up(&sm->deps->hardware) == false) {
+    if (is_grid_up(sm->deps->hardware) == false) {
         sm->transitionTo(Stability);
     }
 
     // Did generator start even if grid is up?
-    if (is_generator_up(&sm->deps->hardware) == true) {
+    if (is_generator_up(sm->deps->hardware) == true) {
         sm->transitionTo(Normal2);
     }
 
@@ -137,30 +137,30 @@ void exitNormal(FSM *sm) {}
 */
 void enterStability(FSM *sm) {
     // Reset stability time
-    sm->deps->timer.reset_timer(STABILITY_TIME);
+    sm->deps->timer->reset_timer(STABILITY_TIME);
     // Start counting stability time from the start
-    sm->deps->timer.set_timer(STABILITY_TIME, true);
+    sm->deps->timer->set_timer(STABILITY_TIME, true);
 }
 
 void updateStability(FSM *sm) {
 
     // Stability time counted all down to zero and grid still is not up
-    if (sm->deps->timer.get_remaining_time(STABILITY_TIME) == 0 && is_grid_up(&sm->deps->hardware) == false) {
+    if (sm->deps->timer->get_remaining_time(STABILITY_TIME) == 0 && is_grid_up(sm->deps->hardware) == false) {
         sm->transitionTo(WaitGen);
     }
 
     if (
-        sm->deps->timer.get_remaining_time(STABILITY_TIME) == 0 &&
-        is_grid_up(&sm->deps->hardware) == true &&
-        is_generator_up(&sm->deps->hardware) == false
+        sm->deps->timer->get_remaining_time(STABILITY_TIME) == 0 &&
+        is_grid_up(sm->deps->hardware) == true &&
+        is_generator_up(sm->deps->hardware) == false
     ) {
         sm->transitionTo(Normal);
     }
 
     if (
-        is_grid_up(&sm->deps->hardware) == true &&
-        is_generator_up(&sm->deps->hardware) == true &&
-        sm->deps->timer.get_remaining_time(STABILITY_TIME) == 0
+        is_grid_up(sm->deps->hardware) == true &&
+        is_generator_up(sm->deps->hardware) == true &&
+        sm->deps->timer->get_remaining_time(STABILITY_TIME) == 0
     ) {
         sm->transitionTo(SwitchDelayToGrid);
     }
@@ -168,7 +168,7 @@ void updateStability(FSM *sm) {
 }
 
 void exitStability(FSM *sm) {
-    sm->deps->timer.set_timer(STABILITY_TIME, false);
+    sm->deps->timer->set_timer(STABILITY_TIME, false);
 }
 
 
@@ -182,11 +182,11 @@ void updateWaitGen(FSM *sm) {
 
     // Do not wait that the generator starts since
     // grid went back online
-    if (is_grid_up(&sm->deps->hardware) == true) {
+    if (is_grid_up(sm->deps->hardware) == true) {
         sm->transitionTo(Stability);
     }
 
-    if (is_generator_up(&sm->deps->hardware) == true) {
+    if (is_generator_up(sm->deps->hardware) == true) {
         sm->transitionTo(WarmUp);
     }
 
@@ -200,18 +200,18 @@ void exitWaitGen(FSM *sm) {}
  * 
 */
 void enterWarmUp(FSM *sm) {
-    sm->deps->timer.reset_timer(WARM_UP_TIME);
-    sm->deps->timer.set_timer(WARM_UP_TIME, true);
+    sm->deps->timer->reset_timer(WARM_UP_TIME);
+    sm->deps->timer->set_timer(WARM_UP_TIME, true);
 }
 
 void updateWarmUp(FSM *sm) {
-    if (sm->deps->timer.get_remaining_time(WARM_UP_TIME) == 0) {
+    if (sm->deps->timer->get_remaining_time(WARM_UP_TIME) == 0) {
         sm->transitionTo(SwitchDelayToGen);
     }
 }
 
 void exitWarmUp(FSM *sm) {
-    sm->deps->timer.set_timer(WARM_UP_TIME, false);
+    sm->deps->timer->set_timer(WARM_UP_TIME, false);
 }
 
 
@@ -221,23 +221,23 @@ void exitWarmUp(FSM *sm) {
 */
 void enterSwitchDelayToGen(FSM *sm) {
     // Disconnect grid contactor
-    set_grid_contactor(&sm->deps->hardware, false);
+    set_grid_contactor(sm->deps->hardware, false);
     // Set timers
-    sm->deps->timer.reset_timer(SWITCHING_DELAY);
-    sm->deps->timer.set_timer(SWITCHING_DELAY, true);
+    sm->deps->timer->reset_timer(SWITCHING_DELAY);
+    sm->deps->timer->set_timer(SWITCHING_DELAY, true);
 
 }
 
 void updateSwitchDelayToGen(FSM *sm) {
 
-    if (sm->deps->timer.get_remaining_time(SWITCHING_DELAY) == 0) {
+    if (sm->deps->timer->get_remaining_time(SWITCHING_DELAY) == 0) {
         sm->transitionTo(SwitchToGen);
     }
 
 }
 
 void exitSwitchDelayToGen(FSM *sm) {
-    sm->deps->timer.set_timer(SWITCHING_DELAY, false);
+    sm->deps->timer->set_timer(SWITCHING_DELAY, false);
 }
 
 
@@ -248,7 +248,7 @@ void exitSwitchDelayToGen(FSM *sm) {
 void enterSwitchToGen(FSM *sm) {
 
     // Connect generator to load
-    set_generator_contactor(&sm->deps->hardware, true);
+    set_generator_contactor(sm->deps->hardware, true);
 
     // This state is not fully implemented as specification suggests.
     // Specification is too inaccurate. >We assume that the generator keeps running
@@ -286,11 +286,11 @@ void enterNormal2(FSM *sm) {}
 
 void updateNormal2(FSM *sm) {
 
-    if (is_generator_up(&sm->deps->hardware) == false) {
+    if (is_generator_up(sm->deps->hardware) == false) {
         sm->transitionTo(Normal);
     }
 
-    if (is_grid_up(&sm->deps->hardware) == false) {
+    if (is_grid_up(sm->deps->hardware) == false) {
         sm->transitionTo(WaitGen);
     }
 
@@ -304,16 +304,16 @@ void exitNormal2(FSM *sm) {}
  * 
 */
 void enterSwitchDelayToGrid(FSM *sm) {
-    sm->deps->timer.reset_timer(SWITCHING_DELAY);
-    sm->deps->timer.set_timer(SWITCHING_DELAY, true);
+    sm->deps->timer->reset_timer(SWITCHING_DELAY);
+    sm->deps->timer->set_timer(SWITCHING_DELAY, true);
 }
 
 void updateSwitchDelayToGrid(FSM *sm) {
 
     if (
-        is_grid_up(&sm->deps->hardware) == true &&
-        is_generator_up(&sm->deps->hardware) == true &&
-        sm->deps->timer.get_remaining_time(STABILITY_TIME) == 0
+        is_grid_up(sm->deps->hardware) == true &&
+        is_generator_up(sm->deps->hardware) == true &&
+        sm->deps->timer->get_remaining_time(STABILITY_TIME) == 0
     ) {
         sm->transitionTo(Normal);
     }
@@ -321,5 +321,5 @@ void updateSwitchDelayToGrid(FSM *sm) {
 }
 
 void exitSwitchDelayToGrid(FSM *sm) {
-    sm->deps->timer.set_timer(SWITCHING_DELAY, false);
+    sm->deps->timer->set_timer(SWITCHING_DELAY, false);
 }
