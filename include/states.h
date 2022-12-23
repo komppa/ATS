@@ -16,53 +16,53 @@ void init_state_machine();
 
 
 // Helpers
-bool is_grid_up();
-bool is_generator_up();
-void set_grid_contactor(bool status);
-void set_generator_contactor(bool status);
+bool is_grid_up(Hardware *h);
+bool is_generator_up(Hardware *h);
+void set_grid_contactor(Hardware *h, bool status);
+void set_generator_contactor(Hardware *h, bool status);
 
 
 // States
 
-void enterUnknownStart();
-void updateUnknownStart();
-void exitUnknownStart();
+void enterUnknownStart(FSM* sm);
+void updateUnknownStart(FSM* sm);
+void exitUnknownStart(FSM* sm);
 
-void enterNormal();
-void updateNormal();
-void exitNormal();
+void enterNormal(FSM* sm);
+void updateNormal(FSM* sm);
+void exitNormal(FSM* sm);
 
-void enterStability();
-void updateStability();
-void exitStability();
+void enterStability(FSM* sm);
+void updateStability(FSM* sm);
+void exitStability(FSM* sm);
 
-void enterWaitGen();
-void updateWaitGen();
-void exitWaitGen();
+void enterWaitGen(FSM* sm);
+void updateWaitGen(FSM* sm);
+void exitWaitGen(FSM* sm);
 
-void enterWarmUp();
-void updateWarmUp();
-void exitWarmUp();
+void enterWarmUp(FSM* sm);
+void updateWarmUp(FSM* sm);
+void exitWarmUp(FSM* sm);
 
-void enterSwitchDelayToGen();
-void updateSwitchDelayToGen();
-void exitSwitchDelayToGen();
+void enterSwitchDelayToGen(FSM* sm);
+void updateSwitchDelayToGen(FSM* sm);
+void exitSwitchDelayToGen(FSM* sm);
 
-void enterSwitchToGen();
-void updateSwitchToGen();
-void exitSwitchToGen();
+void enterSwitchToGen(FSM* sm);
+void updateSwitchToGen(FSM* sm);
+void exitSwitchToGen(FSM* sm);
 
-void enterDetachGen();
-void updateDetachGen();
-void exitDetachGen();
+void enterDetachGen(FSM* sm);
+void updateDetachGen(FSM* sm);
+void exitDetachGen(FSM* sm);
 
-void enterNormal2();
-void updateNormal2();
-void exitNormal2();
+void enterNormal2(FSM* sm);
+void updateNormal2(FSM* sm);
+void exitNormal2(FSM* sm);
 
-void enterSwitchDelayToGrid();
-void updateSwitchDelayToGrid();
-void exitSwitchDelayToGrid();
+void enterSwitchDelayToGrid(FSM* sm);
+void updateSwitchDelayToGrid(FSM* sm);
+void exitSwitchDelayToGrid(FSM* sm);
 
 
 #endif

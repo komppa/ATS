@@ -2,28 +2,37 @@
 #include <stdio.h>
 #include "hardware.h"
 #include "settings.h"
-
-Timer timer;
-
-
-State UnknownStart = State("UnknownStart", enterUnknownStart, updateUnknownStart, exitUnknownStart);
-State Normal = State("Normal", enterNormal, updateNormal, exitNormal);
-State Stability = State("Stability", enterStability, updateStability, exitStability);
-State WaitGen = State("WaitGen", enterWaitGen, updateWaitGen, exitWaitGen);
-State WarmUp = State("WarmUp", enterWarmUp, updateWarmUp, exitWarmUp);
-State SwitchDelayToGen = State("SwitchDelayToGen", enterSwitchDelayToGen, updateSwitchDelayToGen, exitSwitchDelayToGen);
-State SwitchToGen = State("SwitchToGen", enterSwitchToGen, updateSwitchToGen, exitSwitchToGen);
-State DetachGen = State("DetachGen", enterDetachGen, updateDetachGen, exitDetachGen);
-State Normal2 = State("Normal2", enterNormal2, updateNormal2, exitNormal2);
-State SwitchDelayToGrid = State("SwitchDelayToGrid", enterSwitchDelayToGrid, updateSwitchDelayToGrid, exitSwitchDelayToGrid);
+#include "FiniteStateMachine.hpp"
 
 
-FSM sm = FSM(UnknownStart);
+
+State UnknownStart = State("UnknownStart", &enterUnknownStart, &updateUnknownStart, &exitUnknownStart);
+State Normal = State("Normal", &enterNormal, &updateNormal, &exitNormal);
+State Stability = State("Stability", &enterStability, &updateStability, &exitStability);
+State WaitGen = State("WaitGen", &enterWaitGen, &updateWaitGen, &exitWaitGen);
+State WarmUp = State("WarmUp", &enterWarmUp, &updateWarmUp, &exitWarmUp);
+State SwitchDelayToGen = State("SwitchDelayToGen", &enterSwitchDelayToGen, &updateSwitchDelayToGen, &exitSwitchDelayToGen);
+State SwitchToGen = State("SwitchToGen", &enterSwitchToGen, &updateSwitchToGen, &exitSwitchToGen);
+State DetachGen = State("DetachGen", &enterDetachGen, &updateDetachGen, &exitDetachGen);
+State Normal2 = State("Normal2", &enterNormal2, &updateNormal2, &exitNormal2);
+State SwitchDelayToGrid = State("SwitchDelayToGrid", &enterSwitchDelayToGrid, &updateSwitchDelayToGrid, &exitSwitchDelayToGrid);
+
+
+
+
 Hardware hardware;
+Timer timer;
+Deps deps = {
+    .hardware = hardware,
+    .timer = timer
+};
 
 
-bool is_grid_up() {
-    int grid_voltage = hardware.getVoltageAC(PIN_VOLTAGE_GRID);
+FSM sm = FSM(UnknownStart, &deps);
+
+
+bool is_grid_up(Hardware *h) {
+    int grid_voltage = h->getVoltageAC(PIN_VOLTAGE_GRID);
     if (grid_voltage < SETTING_MIN_VOLTAGE_THRESHOLD)
     {
         return false;
@@ -32,8 +41,8 @@ bool is_grid_up() {
     return true;
 }
 
-bool is_generator_up() {
-    int grid_voltage = hardware.getVoltageAC(PIN_VOLTAGE_GRID);
+bool is_generator_up(Hardware *h) {
+    int grid_voltage = h->getVoltageAC(PIN_VOLTAGE_GENERATOR);
     if (grid_voltage < SETTING_MIN_VOLTAGE_THRESHOLD)
     {
         return false;
@@ -42,28 +51,28 @@ bool is_generator_up() {
     return true;
 }
 
-void set_grid_contactor(bool status) {
+void set_grid_contactor(Hardware *h, bool status) {
     // It is so critical action to ensure that the other contactor is off when
     // switching grid on, that other contactor is switched off before grid is kicked in
 
     // Grid is being activated, switch generator off before that
     if (status == true) {
-        hardware.digitalWrite(PIN_CONTACTOR_GENERATOR, false);
-        hardware.delay(100);
+        h->digitalWrite(PIN_CONTACTOR_GENERATOR, false);
+        h->delay(100);
     }
 
-    hardware.digitalWrite(PIN_CONTACTOR_GRID, status);
+    h->digitalWrite(PIN_CONTACTOR_GRID, status);
 }
 
-void set_generator_contactor(bool status) {
+void set_generator_contactor(Hardware *h, bool status) {
     // Generator is being activated, switch grid off before that
     // and do a little guard wait
     if (status == true) {
-        hardware.digitalWrite(PIN_CONTACTOR_GRID, false);
-        hardware.delay(100);
+        h->digitalWrite(PIN_CONTACTOR_GRID, false);
+        h->delay(100);
     }
 
-    hardware.digitalWrite(PIN_CONTACTOR_GENERATOR, status);
+    h->digitalWrite(PIN_CONTACTOR_GENERATOR, status);
 }
 
 
@@ -75,20 +84,17 @@ void set_generator_contactor(bool status) {
 */
 // This 'UNKNOWN_START'-state is used as a setup. 
 // This is why timers are reseted here
-void enterUnknownStart() {
-    // TODO CRIT TODO HIGH check really and not just forward a call
-    timer.reset_timer(ALL);
-    sm.transitionTo(Normal);
+void enterUnknownStart(FSM *sm) {
+    sm->deps->timer.reset_timer(ALL);
+    sm->transitionTo(Normal);
 }
 
-void updateUnknownStart() {
+void updateUnknownStart(FSM *sm) {
     printf("@updateUnknownStart\n");
-
 }
 
-void exitUnknownStart() {
+void exitUnknownStart(FSM *sm) {
     printf("@exitUnknownStart\n");
-
 }
 
 
@@ -96,75 +102,73 @@ void exitUnknownStart() {
  * NORMAL -STATE
  * 
 */
-void enterNormal() {
+void enterNormal(FSM *sm) {
 
     printf("@enterNormal\n");
 
     // Init contactor states 
-    set_generator_contactor(false);
-    set_grid_contactor(true);
+    set_generator_contactor(&sm->deps->hardware, false);
+    set_grid_contactor(&sm->deps->hardware, true);
     // TODO LOW gen_stop
 
 }
 
-void updateNormal() {
+void updateNormal(FSM *sm) {
 
 
     // Did grid went down?
-    if (is_grid_up() == false) {
-        sm.transitionTo(Stability);
+    if (is_grid_up(&sm->deps->hardware) == false) {
+        sm->transitionTo(Stability);
     }
 
     // Did generator start even if grid is up?
-    if (is_generator_up() == true) {
-        sm.transitionTo(Normal2);
+    if (is_generator_up(&sm->deps->hardware) == true) {
+        sm->transitionTo(Normal2);
     }
 
 }
 
-void exitNormal() {
-
-}
+void exitNormal(FSM *sm) {}
 
 
 /**
  * STABILITY -STATE
  * 
 */
-void enterStability() {
+void enterStability(FSM *sm) {
     // Reset stability time
-    timer.reset_timer(STABILITY_TIME);
+    sm->deps->timer.reset_timer(STABILITY_TIME);
     // Start counting stability time from the start
-    timer.set_timer(STABILITY_TIME, true);
+    sm->deps->timer.set_timer(STABILITY_TIME, true);
 }
 
-void updateStability() {
+void updateStability(FSM *sm) {
 
     // Stability time counted all down to zero and grid still is not up
-    if (timer.get_remaining_time(STABILITY_TIME) == 0 && is_grid_up() == false) {
-        sm.transitionTo(WaitGen);
+    if (sm->deps->timer.get_remaining_time(STABILITY_TIME) == 0 && is_grid_up(&sm->deps->hardware) == false) {
+        sm->transitionTo(WaitGen);
     }
 
     if (
-        timer.get_remaining_time(STABILITY_TIME) == 0 &&
-        is_grid_up() == true &&
-        is_generator_up() == false
+        sm->deps->timer.get_remaining_time(STABILITY_TIME) == 0 &&
+        is_grid_up(&sm->deps->hardware) == true &&
+        is_generator_up(&sm->deps->hardware) == false
     ) {
-        sm.transitionTo(Normal);
+        sm->transitionTo(Normal);
     }
 
     if (
-        is_grid_up() == true &&
-        is_generator_up() == true &&
-        timer.get_remaining_time(STABILITY_TIME) == 0
+        is_grid_up(&sm->deps->hardware) == true &&
+        is_generator_up(&sm->deps->hardware) == true &&
+        sm->deps->timer.get_remaining_time(STABILITY_TIME) == 0
     ) {
-        sm.transitionTo(SwitchDelayToGrid);
+        sm->transitionTo(SwitchDelayToGrid);
     }
 
 }
 
-void exitStability() {
-    timer.set_timer(STABILITY_TIME, false);
+void exitStability(FSM *sm) {
+    sm->deps->timer.set_timer(STABILITY_TIME, false);
 }
 
 
@@ -172,46 +176,42 @@ void exitStability() {
  * WAITGEN -STATE
  * 
 */
-void enterWaitGen() {
+void enterWaitGen(FSM *sm) {}
 
-}
-
-void updateWaitGen() {
+void updateWaitGen(FSM *sm) {
 
     // Do not wait that the generator starts since
     // grid went back online
-    if (is_grid_up() == true) {
-        sm.transitionTo(Stability);
+    if (is_grid_up(&sm->deps->hardware) == true) {
+        sm->transitionTo(Stability);
     }
 
-    if (is_generator_up() == true) {
-        sm.transitionTo(WarmUp);
+    if (is_generator_up(&sm->deps->hardware) == true) {
+        sm->transitionTo(WarmUp);
     }
 
 }
 
-void exitWaitGen() {
-
-}
+void exitWaitGen(FSM *sm) {}
 
 
 /**
  * WARMUP -STATE
  * 
 */
-void enterWarmUp() {
-    timer.reset_timer(WARM_UP_TIME);
-    timer.set_timer(WARM_UP_TIME, true);
+void enterWarmUp(FSM *sm) {
+    sm->deps->timer.reset_timer(WARM_UP_TIME);
+    sm->deps->timer.set_timer(WARM_UP_TIME, true);
 }
 
-void updateWarmUp() {
-    if (timer.get_remaining_time(WARM_UP_TIME) == 0) {
-        sm.transitionTo(SwitchDelayToGen);
+void updateWarmUp(FSM *sm) {
+    if (sm->deps->timer.get_remaining_time(WARM_UP_TIME) == 0) {
+        sm->transitionTo(SwitchDelayToGen);
     }
 }
 
-void exitWarmUp() {
-    timer.set_timer(WARM_UP_TIME, false);
+void exitWarmUp(FSM *sm) {
+    sm->deps->timer.set_timer(WARM_UP_TIME, false);
 }
 
 
@@ -219,25 +219,25 @@ void exitWarmUp() {
  * SWITCHDELAYTOGEN -STATE
  * 
 */
-void enterSwitchDelayToGen() {
+void enterSwitchDelayToGen(FSM *sm) {
     // Disconnect grid contactor
-    set_grid_contactor(false);
+    set_grid_contactor(&sm->deps->hardware, false);
     // Set timers
-    timer.reset_timer(SWITCHING_DELAY);
-    timer.set_timer(SWITCHING_DELAY, true);
+    sm->deps->timer.reset_timer(SWITCHING_DELAY);
+    sm->deps->timer.set_timer(SWITCHING_DELAY, true);
 
 }
 
-void updateSwitchDelayToGen() {
+void updateSwitchDelayToGen(FSM *sm) {
 
-    if (timer.get_remaining_time(SWITCHING_DELAY) == 0) {
-        sm.transitionTo(SwitchToGen);
+    if (sm->deps->timer.get_remaining_time(SWITCHING_DELAY) == 0) {
+        sm->transitionTo(SwitchToGen);
     }
 
 }
 
-void exitSwitchDelayToGen() {
-    timer.set_timer(SWITCHING_DELAY, false);
+void exitSwitchDelayToGen(FSM *sm) {
+    sm->deps->timer.set_timer(SWITCHING_DELAY, false);
 }
 
 
@@ -245,91 +245,81 @@ void exitSwitchDelayToGen() {
  * SWITCHTOGEN -STATE
  * 
 */
-void enterSwitchToGen() {
+void enterSwitchToGen(FSM *sm) {
 
     // Connect generator to load
-    set_generator_contactor(true);
+    set_generator_contactor(&sm->deps->hardware, true);
 
     // This state is not fully implemented as specification suggests.
     // Specification is too inaccurate. >We assume that the generator keeps running
-    sm.transitionTo(Stability);
+    sm->transitionTo(Stability);
 
 }
 
-void updateSwitchToGen() {
+void updateSwitchToGen(FSM *sm) {
     // Not used, check is made instanly on @enter
 }
 
-void exitSwitchToGen() {
-
-}
+void exitSwitchToGen(FSM *sm) {}
 
 
 /**
  * DETACHGEN -STATE
  * 
 */
-void enterDetachGen() {
+void enterDetachGen(FSM *sm) {
     // Not used.
     // But if someone uses, kick instantly to next (only one possible next) state
-    sm.transitionTo(WaitGen);
+    sm->transitionTo(WaitGen);
 }
 
-void updateDetachGen() {
+void updateDetachGen(FSM *sm) {}
 
-}
-
-void exitDetachGen() {
-
-}
+void exitDetachGen(FSM *sm) {}
 
 
 /**
  * NORMAL2 -STATE
  * 
 */
-void enterNormal2() {
+void enterNormal2(FSM *sm) {}
 
-}
+void updateNormal2(FSM *sm) {
 
-void updateNormal2() {
-
-    if (is_generator_up() == false) {
-        sm.transitionTo(Normal);
+    if (is_generator_up(&sm->deps->hardware) == false) {
+        sm->transitionTo(Normal);
     }
 
-    if (is_grid_up() == false) {
-        sm.transitionTo(WaitGen);
+    if (is_grid_up(&sm->deps->hardware) == false) {
+        sm->transitionTo(WaitGen);
     }
 
 }
 
-void exitNormal2() {
-
-}
+void exitNormal2(FSM *sm) {}
 
 
 /**
  * SWITCHDELAYTOGRID -STATE
  * 
 */
-void enterSwitchDelayToGrid() {
-    timer.reset_timer(SWITCHING_DELAY);
-    timer.set_timer(SWITCHING_DELAY, true);
+void enterSwitchDelayToGrid(FSM *sm) {
+    sm->deps->timer.reset_timer(SWITCHING_DELAY);
+    sm->deps->timer.set_timer(SWITCHING_DELAY, true);
 }
 
-void updateSwitchDelayToGrid() {
+void updateSwitchDelayToGrid(FSM *sm) {
 
     if (
-        is_grid_up() == true &&
-        is_generator_up() == true &&
-        timer.get_remaining_time(STABILITY_TIME) == 0
+        is_grid_up(&sm->deps->hardware) == true &&
+        is_generator_up(&sm->deps->hardware) == true &&
+        sm->deps->timer.get_remaining_time(STABILITY_TIME) == 0
     ) {
-        sm.transitionTo(Normal);
+        sm->transitionTo(Normal);
     }
 
 }
 
-void exitSwitchDelayToGrid() {
-    timer.set_timer(SWITCHING_DELAY, false);
+void exitSwitchDelayToGrid(FSM *sm) {
+    sm->deps->timer.set_timer(SWITCHING_DELAY, false);
 }

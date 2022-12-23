@@ -32,7 +32,8 @@
 #ifndef FINITESTATEMACHINE_H
 #define FINITESTATEMACHINE_H
 
-// #include "hardware.h"
+#include "hardware.h"
+#include "timers.hpp"
 #include <string>
 
 using namespace std;
@@ -49,8 +50,8 @@ class State;
 class FiniteStateMachine;
 
 struct Deps {
-    Hardware hardware;
-	Timer timer;
+    Hardware *hardware;
+	Timer *timer;
 };
 
 //define the functionality of the states
