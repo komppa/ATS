@@ -12,9 +12,6 @@
 
 using namespace std;
 
-void init_state_machine();
-
-
 // Helpers
 bool is_grid_up(Hardware *h);
 bool is_generator_up(Hardware *h);
@@ -65,4 +62,4 @@ void updateSwitchDelayToGrid(FSM* sm);
 void exitSwitchDelayToGrid(FSM* sm);
 
 
-#endif
+#endif  // STATES_H

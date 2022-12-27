@@ -5,7 +5,6 @@
 #include "FiniteStateMachine.hpp"
 
 
-
 State UnknownStart = State("UnknownStart", &enterUnknownStart, &updateUnknownStart, &exitUnknownStart);
 State Normal = State("Normal", &enterNormal, &updateNormal, &exitNormal);
 State Stability = State("Stability", &enterStability, &updateStability, &exitStability);
@@ -16,19 +15,6 @@ State SwitchToGen = State("SwitchToGen", &enterSwitchToGen, &updateSwitchToGen, 
 State DetachGen = State("DetachGen", &enterDetachGen, &updateDetachGen, &exitDetachGen);
 State Normal2 = State("Normal2", &enterNormal2, &updateNormal2, &exitNormal2);
 State SwitchDelayToGrid = State("SwitchDelayToGrid", &enterSwitchDelayToGrid, &updateSwitchDelayToGrid, &exitSwitchDelayToGrid);
-
-
-
-
-// Hardware hardware;
-// Timer timer;
-// Deps deps = {
-//     .hardware = &hardware,
-//     .timer = &timer
-// };
-
-
-// FSM sm = FSM(UnknownStart, &deps);
 
 
 bool is_grid_up(Hardware *h) {
