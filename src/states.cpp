@@ -247,9 +247,10 @@ void enterSwitchToGen(FSM *sm) {
     // Connect generator to load
     set_generator_contactor(sm->deps->hardware, true);
 
-    // This state is not fully implemented as specification suggests.
-    // Specification is too inaccurate. >We assume that the generator keeps running
-    sm->transitionTo(Stability);
+    
+    if (sm->deps->hardware->getVoltageAC(PIN_CONTACTOR_GRID) == true) {
+        sm->transitionTo(Stability);
+    }
 
 }
 

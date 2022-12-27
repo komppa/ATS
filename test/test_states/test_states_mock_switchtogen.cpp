@@ -11,7 +11,7 @@ using namespace testing;
 using ::testing::AtLeast;
 
 
-TEST(states, switchtogen) {
+TEST(states, switchtogen_ensure_contactor_calls) {
 
     extern State SwitchToGen;
 
