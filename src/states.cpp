@@ -42,8 +42,8 @@ bool is_grid_up(Hardware *h) {
 }
 
 bool is_generator_up(Hardware *h) {
-    int grid_voltage = h->getVoltageAC(PIN_VOLTAGE_GENERATOR);
-    if (grid_voltage < SETTING_MIN_VOLTAGE_THRESHOLD)
+    int generator_voltage = h->getVoltageAC(PIN_VOLTAGE_GENERATOR);
+    if (generator_voltage < SETTING_MIN_VOLTAGE_THRESHOLD)
     {
         return false;
     }
@@ -89,13 +89,9 @@ void enterUnknownStart(FSM *sm) {
     sm->transitionTo(Normal);
 }
 
-void updateUnknownStart(FSM *sm) {
-    printf("@updateUnknownStart\n");
-}
+void updateUnknownStart(FSM *sm) {}
 
-void exitUnknownStart(FSM *sm) {
-    printf("@exitUnknownStart\n");
-}
+void exitUnknownStart(FSM *sm) {}
 
 
 /**
@@ -103,18 +99,13 @@ void exitUnknownStart(FSM *sm) {
  * 
 */
 void enterNormal(FSM *sm) {
-
-    printf("@enterNormal\n");
-
     // Init contactor states 
     set_generator_contactor(sm->deps->hardware, false);
     set_grid_contactor(sm->deps->hardware, true);
     // TODO LOW gen_stop
-
 }
 
 void updateNormal(FSM *sm) {
-
 
     // Did grid went down?
     if (is_grid_up(sm->deps->hardware) == false) {
@@ -139,13 +130,16 @@ void enterStability(FSM *sm) {
     // Reset stability time
     sm->deps->timer->reset_timer(STABILITY_TIME);
     // Start counting stability time from the start
-    sm->deps->timer->set_timer(STABILITY_TIME, true);
+    sm->deps->timer->enable_timer(STABILITY_TIME, true);
 }
 
 void updateStability(FSM *sm) {
 
     // Stability time counted all down to zero and grid still is not up
-    if (sm->deps->timer->get_remaining_time(STABILITY_TIME) == 0 && is_grid_up(sm->deps->hardware) == false) {
+    if (
+        sm->deps->timer->get_remaining_time(STABILITY_TIME) == 0 &&
+        is_grid_up(sm->deps->hardware) == false
+    ) {
         sm->transitionTo(WaitGen);
     }
 
@@ -168,7 +162,7 @@ void updateStability(FSM *sm) {
 }
 
 void exitStability(FSM *sm) {
-    sm->deps->timer->set_timer(STABILITY_TIME, false);
+    sm->deps->timer->enable_timer(STABILITY_TIME, false);
 }
 
 
@@ -176,7 +170,10 @@ void exitStability(FSM *sm) {
  * WAITGEN -STATE
  * 
 */
-void enterWaitGen(FSM *sm) {}
+void enterWaitGen(FSM *sm) {
+    sm->deps->timer->reset_timer(WARM_UP_TIME);
+    sm->deps->timer->enable_timer(WARM_UP_TIME, true);
+}
 
 void updateWaitGen(FSM *sm) {
 
@@ -201,7 +198,7 @@ void exitWaitGen(FSM *sm) {}
 */
 void enterWarmUp(FSM *sm) {
     sm->deps->timer->reset_timer(WARM_UP_TIME);
-    sm->deps->timer->set_timer(WARM_UP_TIME, true);
+    sm->deps->timer->enable_timer(WARM_UP_TIME, true);
 }
 
 void updateWarmUp(FSM *sm) {
@@ -211,7 +208,7 @@ void updateWarmUp(FSM *sm) {
 }
 
 void exitWarmUp(FSM *sm) {
-    sm->deps->timer->set_timer(WARM_UP_TIME, false);
+    sm->deps->timer->enable_timer(WARM_UP_TIME, false);
 }
 
 
@@ -224,7 +221,7 @@ void enterSwitchDelayToGen(FSM *sm) {
     set_grid_contactor(sm->deps->hardware, false);
     // Set timers
     sm->deps->timer->reset_timer(SWITCHING_DELAY);
-    sm->deps->timer->set_timer(SWITCHING_DELAY, true);
+    sm->deps->timer->enable_timer(SWITCHING_DELAY, true);
 
 }
 
@@ -237,7 +234,7 @@ void updateSwitchDelayToGen(FSM *sm) {
 }
 
 void exitSwitchDelayToGen(FSM *sm) {
-    sm->deps->timer->set_timer(SWITCHING_DELAY, false);
+    sm->deps->timer->enable_timer(SWITCHING_DELAY, false);
 }
 
 
@@ -256,9 +253,8 @@ void enterSwitchToGen(FSM *sm) {
 
 }
 
-void updateSwitchToGen(FSM *sm) {
-    // Not used, check is made instanly on @enter
-}
+// Not used, check is made instanly on @enter
+void updateSwitchToGen(FSM *sm) {}
 
 void exitSwitchToGen(FSM *sm) {}
 
@@ -268,8 +264,9 @@ void exitSwitchToGen(FSM *sm) {}
  * 
 */
 void enterDetachGen(FSM *sm) {
-    // Not used.
-    // But if someone uses, kick instantly to next (only one possible next) state
+    // Release generator contactor since generator is not available anymore
+    set_generator_contactor(sm->deps->hardware, false);
+    // Go and wait generator to start again
     sm->transitionTo(WaitGen);
 }
 
@@ -304,22 +301,25 @@ void exitNormal2(FSM *sm) {}
  * 
 */
 void enterSwitchDelayToGrid(FSM *sm) {
+
+    // Disconnect generator contactor
+    set_generator_contactor(sm->deps->hardware, false);
+
     sm->deps->timer->reset_timer(SWITCHING_DELAY);
-    sm->deps->timer->set_timer(SWITCHING_DELAY, true);
+    sm->deps->timer->enable_timer(SWITCHING_DELAY, true);
 }
 
 void updateSwitchDelayToGrid(FSM *sm) {
 
-    if (
-        is_grid_up(sm->deps->hardware) == true &&
-        is_generator_up(sm->deps->hardware) == true &&
-        sm->deps->timer->get_remaining_time(STABILITY_TIME) == 0
-    ) {
+    // Grid contactor is not activated here,
+    // it is done by Normal-state
+
+    if (sm->deps->timer->get_remaining_time(SWITCHING_DELAY) == 0) {
         sm->transitionTo(Normal);
     }
 
 }
 
 void exitSwitchDelayToGrid(FSM *sm) {
-    sm->deps->timer->set_timer(SWITCHING_DELAY, false);
+    sm->deps->timer->enable_timer(SWITCHING_DELAY, false);
 }
