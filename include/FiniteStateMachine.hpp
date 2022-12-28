@@ -34,7 +34,13 @@
 
 #include "hardware.h"
 #include "timers.hpp"
+#ifdef UNIT_TEST
 #include <string>
+#else
+// Include for deps if building for atmega2560
+#include <Keypad.h>
+#include "writer.h"
+#endif // UNIT_TEST
 
 using namespace std;
 
@@ -52,21 +58,39 @@ class FiniteStateMachine;
 struct Deps {
     Hardware *hardware;
 	Timer *timer;
+	#ifndef UNIT_TEST
+	Keypad *keypad;
+	Writer *writer;
+	FiniteStateMachine *sm;	// ATS FSM for display FSM
+	#endif
 };
 
 //define the functionality of the states
 class State {
 	public:
-		// State( void (*updateFunction)() );
+		#ifdef UNIT_TEST
+		State( string stateName, void (*updateFunction)(FiniteStateMachine*));
 		State( string stateName, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) );
+		#else
+		State( String stateName, void (*updateFunction)(FiniteStateMachine*));
+		State( String stateName, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) );
+		#endif
 
 		void enter(FiniteStateMachine *fsm);
 		void update(FiniteStateMachine *fsm);
 		void exit(FiniteStateMachine *fsm);
 
+		#ifdef UNIT_TEST
 		string getStateName();
+		#else
+		String getStateName();
+		#endif
 	private:
+		#ifdef UNIT_TEST
 		string stateName;
+		#else
+		String stateName;
+		#endif
 		void (*userEnter)(FiniteStateMachine*);
 		void (*userUpdate)(FiniteStateMachine*);
 		void (*userExit)(FiniteStateMachine*);
@@ -87,7 +111,7 @@ class FiniteStateMachine {
 		Deps *deps;
 
 		/// boolean isInState( State &state ) const;
-    bool isInState( State &state ) const;
+    	bool isInState( State &state ) const;
 		
 		unsigned long timeInCurrentState();
 		

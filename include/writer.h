@@ -39,6 +39,8 @@ class Writer {
         Writer(LiquidCrystal *lcd);
         writeMode getMode();
         int setMode(writeMode new_mode);
+        int clear();
+        int write(String row);
         int write(String row, String second_row);
         int update();
         int set_write_to_row(writeRow new_write_row);

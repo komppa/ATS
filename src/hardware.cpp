@@ -3,7 +3,7 @@
 
 Hardware::Hardware() {}
 
-unsigned long Hardware::millis() {
+unsigned long Hardware::time() {
     #ifdef ARDUINO
     // If building for Arduino, use real millis function
     return millis();
@@ -13,13 +13,13 @@ unsigned long Hardware::millis() {
     #endif
 }
 
-void Hardware::digitalWrite(uint8_t pin, uint8_t val) {
+void Hardware::setDigital(uint8_t pin, uint8_t val) {
     #ifdef ARDUINO
     return digitalWrite(pin, val);
     #endif
 }
 
-int Hardware::digitalRead(uint8_t pin) {
+int Hardware::getDigital(uint8_t pin) {
     #ifdef ARDUINO
     return digitalRead(pin);
     #else
@@ -31,9 +31,9 @@ int Hardware::digitalRead(uint8_t pin) {
  * Waits using built-in delay function call.
  * Does not wait if native environment.
 */
-void Hardware::delay(unsigned long ms) {
+void Hardware::wait(unsigned long ms) {
     #ifdef ARDUINO
-    // delay(ms);
+    delay(ms);
     #endif
     int i = 0;
     i++;
@@ -41,6 +41,22 @@ void Hardware::delay(unsigned long ms) {
 
 int Hardware::getVoltageAC(uint8_t pin) {
     #ifdef ARDUINO
+    
+    if (digitalRead(PIN_IS_SIMULATOR) == 0) {
+        /*
+            When jumper wire connects D53 to GND
+            it can be thought to be simulator.
+            Since simulator does not have voltage
+            sensor modules, switches are used. 
+            0 = switch on
+            1 = switch off
+        */
+       if (digitalRead(pin) == 0) {
+            return 250;
+       }
+
+       return 0;
+    }
     ZMPT101B z = ZMPT101B(pin);
     float v = z.getVoltageAC() * 10;
     return floor(v);

@@ -20,65 +20,62 @@ int Writer::update() {
 
         // Does the first row need rolling
         if (this->row.length() > DISPLAY_WIDTH) {
-        // "Bounce" protection
-        // if ((this->last_update + 250) <= millis()) {
+            // "Bounce" protection
+            // if ((this->last_update + 250) <= millis()) {
 
-        if (this->row_index == (signed int)((-1) * this->row.length())) {
-            this->row_index = DISPLAY_WIDTH - 1;
-        }
+            if (this->row_index == (signed int)((-1) * this->row.length())) {
+                this->row_index = DISPLAY_WIDTH - 1;
+            }
 
-        this->row_index--;
+            this->row_index--;
 
-        if (this->row_index > 0) {
-            this->lcd->setCursor(this->row_index, 0);
-            // Substringin that the string wont appear to the second row
-            this->lcd->print(this->row.substring(0, (-1) * (this->row_index - DISPLAY_WIDTH)));
+            if (this->row_index > 0) {
+                this->lcd->setCursor(this->row_index, 0);
+                // Substringin that the string wont appear to the second row
+                this->lcd->print(this->row.substring(0, (-1) * (this->row_index - DISPLAY_WIDTH)));
+            } else {
+                // Row should be negative value but since display does not support
+                // negative values, it must be substringed on the fly
+                this->lcd->setCursor(0, 0);
+                this->lcd->print(this->row.substring((-1) * this->row_index));
+            }
+
         } else {
-            // Row should be negative value but since display does not support
-            // negative values, it must be substringed on the fly
-            this->lcd->setCursor(0, 0);
-            this->lcd->print(this->row.substring((-1) * this->row_index));
-        }
-
-        } else {
-        // Scrolling not required for the first row.
-        // Still, redraw everything for the first row since
-        // everything is cleared on screen on every update.
-        this->lcd->setCursor(floor((DISPLAY_WIDTH - row.length()) / 2 ), 0);
-        this->lcd->print(this->row);
+            // Scrolling not required for the first row.
+            // Still, redraw everything for the first row since
+            // everything is cleared on screen on every update.
+            this->lcd->setCursor(floor((DISPLAY_WIDTH - row.length()) / 2 ), 0);
+            this->lcd->print(this->row);
         }
 
         // Does the second row need rolling
         if (this->second_row.length() > DISPLAY_WIDTH) {
 
+            if (this->second_row_index == (signed int)((-1) * this->second_row.length())) {
+                this->second_row_index = DISPLAY_WIDTH - 1;
+            }
 
-        if (this->second_row_index == (signed int)((-1) * this->second_row.length())) {
-            this->second_row_index = DISPLAY_WIDTH - 1;
-        }
+            this->second_row_index--;
 
-        this->second_row_index--;
-
-        if (this->second_row_index > 0) {
-            Serial.println(">");
-            this->lcd->setCursor(this->second_row_index, 1);
-            // Substringin that the string wont appear to the second row
-            //lcd.print(this->second_row.substring(0, (-1) * (this->second_row.length() - DISPLAY_WIDTH)));
-            this->lcd->print(this->second_row.substring(0, (-1) * (this->second_row_index - DISPLAY_WIDTH)));
-        } else {
-            Serial.println("else");
-            // Row should be negative value but since display does not support
-            // negative values, it must be substringed on the fly
-            this->lcd->setCursor(0, 1);
-            this->lcd->print(this->second_row.substring((-1) * this->second_row_index));
-        }
+            if (this->second_row_index > 0) {
+                this->lcd->setCursor(this->second_row_index, 1);
+                // Substringin that the string wont appear to the second row
+                //lcd.print(this->second_row.substring(0, (-1) * (this->second_row.length() - DISPLAY_WIDTH)));
+                this->lcd->print(this->second_row.substring(0, (-1) * (this->second_row_index - DISPLAY_WIDTH)));
+            } else {
+                // Row should be negative value but since display does not support
+                // negative values, it must be substringed on the fly
+                this->lcd->setCursor(0, 1);
+                this->lcd->print(this->second_row.substring((-1) * this->second_row_index));
+            }
         
 
         } else {
-        // Scrolling not required for the second row.
-        // Still, redraw everything for the second row since
-        // everything is cleared on screen on every update.
-        this->lcd->setCursor(floor((DISPLAY_WIDTH - second_row.length()) / 2 ), 1);
-        this->lcd->print(this->second_row);
+            // Scrolling not required for the second row.
+            // Still, redraw everything for the second row since
+            // everything is cleared on screen on every update.
+            this->lcd->setCursor(floor((DISPLAY_WIDTH - second_row.length()) / 2 ), 1);
+            this->lcd->print(this->second_row);
         }
 
         this->last_update = millis();
@@ -110,6 +107,15 @@ writeMode Writer::getMode() {
 int Writer::setMode(writeMode new_mode) {
     this->mode = new_mode;
     return 0;
+}
+
+int Writer::clear() {
+    this->lcd->clear();
+    return 0;
+}
+
+int Writer::write(String row) {
+    this->write(row, "");
 }
 
 

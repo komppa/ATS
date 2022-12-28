@@ -24,8 +24,8 @@ TEST(states, switchtogen_ensure_contactor_calls) {
         .timer = &timer
     };
 
-    EXPECT_CALL(hardware, digitalWrite(PIN_CONTACTOR_GRID, false)).Times(1);
-    EXPECT_CALL(hardware, digitalWrite(PIN_CONTACTOR_GENERATOR, true)).Times(1);
+    EXPECT_CALL(hardware, setDigital(PIN_CONTACTOR_GRID, false)).Times(1);
+    EXPECT_CALL(hardware, setDigital(PIN_CONTACTOR_GENERATOR, true)).Times(1);
 
     FSM sm = FSM(SwitchToGen, &deps);
 

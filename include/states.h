@@ -8,8 +8,6 @@
 #include <Arduino.h>
 #endif
 
-#include <string>
-
 using namespace std;
 
 // Helpers

@@ -43,22 +43,22 @@ void set_grid_contactor(Hardware *h, bool status) {
 
     // Grid is being activated, switch generator off before that
     if (status == true) {
-        h->digitalWrite(PIN_CONTACTOR_GENERATOR, false);
-        h->delay(100);
+        h->setDigital(PIN_CONTACTOR_GENERATOR, false);
+        h->wait(100);
     }
 
-    h->digitalWrite(PIN_CONTACTOR_GRID, status);
+    h->setDigital(PIN_CONTACTOR_GRID, status);
 }
 
 void set_generator_contactor(Hardware *h, bool status) {
     // Generator is being activated, switch grid off before that
     // and do a little guard wait
     if (status == true) {
-        h->digitalWrite(PIN_CONTACTOR_GRID, false);
-        h->delay(100);
+        h->setDigital(PIN_CONTACTOR_GRID, false);
+        h->wait(100);
     }
 
-    h->digitalWrite(PIN_CONTACTOR_GENERATOR, status);
+    h->setDigital(PIN_CONTACTOR_GENERATOR, status);
 }
 
 
@@ -89,6 +89,7 @@ void enterNormal(FSM *sm) {
     set_generator_contactor(sm->deps->hardware, false);
     set_grid_contactor(sm->deps->hardware, true);
     // TODO LOW gen_stop
+    sm->deps->timer->reset_timer(WARM_UP_TIME);
 }
 
 void updateNormal(FSM *sm) {
@@ -96,6 +97,7 @@ void updateNormal(FSM *sm) {
     // Did grid went down?
     if (is_grid_up(sm->deps->hardware) == false) {
         sm->transitionTo(Stability);
+        return;
     }
 
     // Did generator start even if grid is up?
@@ -157,7 +159,6 @@ void exitStability(FSM *sm) {
  * 
 */
 void enterWaitGen(FSM *sm) {
-    sm->deps->timer->reset_timer(WARM_UP_TIME);
     sm->deps->timer->enable_timer(WARM_UP_TIME, true);
 }
 
@@ -183,7 +184,8 @@ void exitWaitGen(FSM *sm) {}
  * 
 */
 void enterWarmUp(FSM *sm) {
-    sm->deps->timer->reset_timer(WARM_UP_TIME);
+    // Do not reset timer since genset might never go down.
+    // Just enable somewhere (Normal-state) previously resetted timer.
     sm->deps->timer->enable_timer(WARM_UP_TIME, true);
 }
 
@@ -203,8 +205,13 @@ void exitWarmUp(FSM *sm) {
  * 
 */
 void enterSwitchDelayToGen(FSM *sm) {
-    // Disconnect grid contactor
-    set_grid_contactor(sm->deps->hardware, false);
+    // Disconnect grid contactor if generator has been
+    // halted some time ago. If (generator) warm up timer
+    // has not been resetted, the generator is still being used.
+    if (sm->deps->timer->get_remaining_time(WARM_UP_TIME) != 0) {
+        set_grid_contactor(sm->deps->hardware, false);
+    }
+    
     // Set timers
     sm->deps->timer->reset_timer(SWITCHING_DELAY);
     sm->deps->timer->enable_timer(SWITCHING_DELAY, true);
@@ -229,19 +236,15 @@ void exitSwitchDelayToGen(FSM *sm) {
  * 
 */
 void enterSwitchToGen(FSM *sm) {
-
     // Connect generator to load
     set_generator_contactor(sm->deps->hardware, true);
-
-    
-    if (sm->deps->hardware->getVoltageAC(PIN_CONTACTOR_GRID) == true) {
-        sm->transitionTo(Stability);
-    }
-
 }
 
-// Not used, check is made instanly on @enter
-void updateSwitchToGen(FSM *sm) {}
+void updateSwitchToGen(FSM *sm) {
+    if (is_grid_up(sm->deps->hardware) == true) {
+        sm->transitionTo(Stability);
+    }
+}
 
 void exitSwitchToGen(FSM *sm) {}
 

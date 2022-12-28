@@ -9,6 +9,11 @@
 #include <Keypad.h>
 #include <Arduino.h>
 #include "writer.h"
+#include "hardware.h"
+#include <stdio.h>
+#include "states.h"
+#include "FiniteStateMachine.hpp"   // for Deps
+#include "display.h"
 
 
 // Display contacts: VSS=GND, VDD=5V, RW=GND, A=5V(VIA 220OHM RESISTOR), K=GND 
@@ -27,18 +32,34 @@ char keys[KEYPAD_ROWS][KEYPAD_COLS] = {
 };
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, KEYPAD_ROWS, KEYPAD_COLS);
+Writer writer = Writer(&lcd);
+
+Hardware hardware;
+Timer timer(&hardware);
+
+Deps ATSFSMDeps = {
+    .hardware = &hardware,
+    .timer = &timer,
+    .keypad = &keypad,
+    .writer = &writer
+};
+
+extern State UnknownStart;
+FSM sm = FSM(UnknownStart, &ATSFSMDeps);
+
+Deps displayFSMDeps = {
+    .hardware = &hardware,
+    .timer = &timer,
+    .keypad = &keypad,
+    .writer = &writer,
+    .sm = &sm
+};
+
+extern State DisplayUnknownStart;
+FSM display = FSM(DisplayUnknownStart, &displayFSMDeps);
 
 
-auto writer = new Writer(&lcd);
 
-
-void updateCursor() {
-    if (millis() / 250 % 2 == 0 ) {
-        lcd.cursor();
-    } else {
-        lcd.noCursor();
-    }
-}
 
 
 void setup() {
@@ -48,34 +69,37 @@ void setup() {
     lcd.clear();
     lcd.setCursor(0, 0);
 
-    writer->setMode(MIDDLE);
-    writer->write("SELET BY PRESSING # -BUTTON", "123456789abcdefghijklmn");
+    writer.setMode(MIDDLE);
+
+    // For checking whether this is simulator in runtime
+    pinMode(PIN_IS_SIMULATOR, INPUT_PULLUP);
+
+    pinMode(PIN_CONTACTOR_GRID, OUTPUT);
+    pinMode(PIN_CONTACTOR_GENERATOR, OUTPUT);
+
+    pinMode(PIN_VOLTAGE_GRID, INPUT_PULLUP);
+    pinMode(PIN_VOLTAGE_GENERATOR, INPUT_PULLUP);
+
+
+    timer.set_timer(STABILITY_TIME, 2);
+    timer.set_timer(WARM_UP_TIME, 2);
 
 }
 
 
-
-
-int period = 1000;
-unsigned long time_now = 0;
-
 void loop() {
 
+    // Limitter
+    delay(100);
 
-    writer->update();
-
-    char key = keypad.getKey();
-
-    if (key) {
-        if (key == '#') {
-            writer->write("> SETTINGS <", "You pressed key #");
-        }
-    }
-
-    if ((unsigned long)(millis() - time_now) > period) {
-        time_now = millis();
-    }
-  
+    // Updates
+    sm.update();
+    timer.update();
+    writer.update();
+    // TODO wait few seconds before starting screen refreshing on startup
+    // to ensure that electricity can be flowed from grid as fast as possible.
+    if (millis() > 1000) display.update();
+    
 }
 
 

@@ -9,6 +9,10 @@
 #include <Arduino.h>
 #endif
 
+#ifdef ARDUINO
+#include <Arduino.h>
+#endif
+
 #ifdef UNIT_TEST
 #include "gmock/gmock.h"
 #endif
@@ -16,11 +20,11 @@
 #define UNKNOWN -1
 #define MOCK_VOLTAGE(pin, ret_val) (ON_CALL(hardware, getVoltageAC(pin)).WillByDefault(Return(ret_val)))
 
-#define MOCK_MILLIS(ret_val) (ON_CALL(hardware, millis()).WillByDefault(Return(ret_val)))
+#define MOCK_MILLIS(ret_val) (ON_CALL(hardware, time()).WillByDefault(Return(ret_val)))
 #define MOCK_FAST_MILLIS(timer, ff_val)                        \
     for (int i = 1; i <= ff_val; i++) {                             \
         if (i % 1000 == 0) {                                        \
-            ON_CALL(hardware, millis()).WillByDefault(Return(i));   \
+            ON_CALL(hardware, time()).WillByDefault(Return(i));   \
             timer.update();                                         \
         }                                                           \
     }
@@ -48,6 +52,8 @@
 #define PIN_DISPLAY_D3          9
 #define PIN_DISPLAY_D2          8
 #define PIN_DISPLAY_D1          7
+// Simulator runtime check
+#define PIN_IS_SIMULATOR        53
 
 
 class Hardware {
@@ -56,10 +62,10 @@ class Hardware {
     public:
         Hardware();
         // Arduino ones
-        virtual unsigned long millis();
-        virtual void digitalWrite(uint8_t pin, uint8_t val);
-        virtual int digitalRead(uint8_t pin);
-        virtual void delay(unsigned long ms);
+        virtual unsigned long time();
+        virtual void setDigital(uint8_t pin, uint8_t val);
+        virtual int getDigital(uint8_t pin);
+        virtual void wait(unsigned long ms);
         // Voltage sensor to be able to mocked
         virtual int getVoltageAC(uint8_t pin);
 };
@@ -68,10 +74,10 @@ class Hardware {
 class MockHardware: public Hardware {
     public:
         // Arduino
-        MOCK_METHOD(unsigned long, millis, ());
-        MOCK_METHOD(void, digitalWrite, (uint8_t, uint8_t));
-        MOCK_METHOD(int, digitalRead, (uint8_t));
-        MOCK_METHOD(void, delay, (unsigned long));
+        MOCK_METHOD(unsigned long, time, ());
+        MOCK_METHOD(void, setDigital, (uint8_t, uint8_t));
+        MOCK_METHOD(int, getDigital, (uint8_t));
+        MOCK_METHOD(void, wait, (unsigned long));
         // Voltage sensor
         MOCK_METHOD(int, getVoltageAC, (uint8_t));
 };
