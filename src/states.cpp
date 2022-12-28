@@ -5,16 +5,16 @@
 #include "FiniteStateMachine.hpp"
 
 
-State UnknownStart = State("UnknownStart", &enterUnknownStart, &updateUnknownStart, &exitUnknownStart);
-State Normal = State("Normal", &enterNormal, &updateNormal, &exitNormal);
-State Stability = State("Stability", &enterStability, &updateStability, &exitStability);
-State WaitGen = State("WaitGen", &enterWaitGen, &updateWaitGen, &exitWaitGen);
-State WarmUp = State("WarmUp", &enterWarmUp, &updateWarmUp, &exitWarmUp);
-State SwitchDelayToGen = State("SwitchDelayToGen", &enterSwitchDelayToGen, &updateSwitchDelayToGen, &exitSwitchDelayToGen);
-State SwitchToGen = State("SwitchToGen", &enterSwitchToGen, &updateSwitchToGen, &exitSwitchToGen);
-State DetachGen = State("DetachGen", &enterDetachGen, &updateDetachGen, &exitDetachGen);
-State Normal2 = State("Normal2", &enterNormal2, &updateNormal2, &exitNormal2);
-State SwitchDelayToGrid = State("SwitchDelayToGrid", &enterSwitchDelayToGrid, &updateSwitchDelayToGrid, &exitSwitchDelayToGrid);
+State UnknownStart = State("UnknownStart", UNKNOWNSTART, &enterUnknownStart, &updateUnknownStart, &exitUnknownStart);
+State Normal = State("Normal", NORMAL, &enterNormal, &updateNormal, &exitNormal);
+State Stability = State("Stability", STABILITY, &enterStability, &updateStability, &exitStability);
+State WaitGen = State("WaitGen", WAITGEN, &enterWaitGen, &updateWaitGen, &exitWaitGen);
+State WarmUp = State("WarmUp", WARMUP, &enterWarmUp, &updateWarmUp, &exitWarmUp);
+State SwitchDelayToGen = State("SwitchDelayToGen", SWITCHDELAYTOGEN, &enterSwitchDelayToGen, &updateSwitchDelayToGen, &exitSwitchDelayToGen);
+State SwitchToGen = State("SwitchToGen", SWITCHTOGEN, &enterSwitchToGen, &updateSwitchToGen, &exitSwitchToGen);
+State DetachGen = State("DetachGen", DETACHGEN, &enterDetachGen, &updateDetachGen, &exitDetachGen);
+State Normal2 = State("Normal2", NORMAL2, &enterNormal2, &updateNormal2, &exitNormal2);
+State SwitchDelayToGrid = State("SwitchDelayToGrid",SWITCHDELAYTOGRID, &enterSwitchDelayToGrid, &updateSwitchDelayToGrid, &exitSwitchDelayToGrid);
 
 
 bool is_grid_up(Hardware *h) {
@@ -205,12 +205,13 @@ void exitWarmUp(FSM *sm) {
  * 
 */
 void enterSwitchDelayToGen(FSM *sm) {
+    // TODO CRIT Old comment: 
     // Disconnect grid contactor if generator has been
     // halted some time ago. If (generator) warm up timer
     // has not been resetted, the generator is still being used.
-    if (sm->deps->timer->get_remaining_time(WARM_UP_TIME) != 0) {
-        set_grid_contactor(sm->deps->hardware, false);
-    }
+    // Do not remove the following line since transfer delay from 
+    // grid to gen is not come true unless this line.
+    set_grid_contactor(sm->deps->hardware, false);
     
     // Set timers
     sm->deps->timer->reset_timer(SWITCHING_DELAY);

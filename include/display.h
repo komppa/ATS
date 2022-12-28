@@ -1,9 +1,7 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
-#ifdef UNIT_TEST
 #include "FiniteStateMachine.hpp"
-#endif
 
 #ifndef UNIT_TEST
 #include <Arduino.h>

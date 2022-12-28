@@ -61,7 +61,7 @@ int Hardware::getVoltageAC(uint8_t pin) {
     float v = z.getVoltageAC() * 10;
     return floor(v);
     #else
-    return -1;
+    return UNKNOWN;
     #endif
 }
 

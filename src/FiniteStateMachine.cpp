@@ -30,9 +30,9 @@
 #include "FiniteStateMachine.hpp"
 
 #ifdef UNIT_TEST
-State::State( string stateName, void (*updateFunction)(FiniteStateMachine*) )
+State::State( string stateName, States estate, void (*updateFunction)(FiniteStateMachine*) )
 #else
-State::State( String stateName, void (*updateFunction)(FiniteStateMachine*) )
+State::State( String stateName, States estate, void (*updateFunction)(FiniteStateMachine*) )
 #endif
 {
 	this->stateName = stateName;
@@ -42,11 +42,12 @@ State::State( String stateName, void (*updateFunction)(FiniteStateMachine*) )
 }
 
 #ifdef UNIT_TEST
-State::State( string stateName, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) )
+State::State( string stateName, States estate, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) )
 #else
-State::State( String stateName, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) )
+State::State( String stateName, States estate, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) )
 #endif
 {
+	this->estate = estate;
 	this->stateName = stateName;
 	this->userEnter = enterFunction;
 	this->userUpdate = updateFunction;
@@ -72,6 +73,10 @@ void State::exit(FiniteStateMachine *fsm){
 	if (this->userExit){
 		this->userExit(fsm);
 	}
+}
+
+States State::getState() {
+	return this->estate;
 }
 
 #ifdef UNIT_TEST

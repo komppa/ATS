@@ -6,10 +6,10 @@
 #ifndef UNIT_TEST
 
 
-State DisplayUnknownStart = State("DisplayUnknownStart", &updateDisplayUnknownStart);
-State DisplayStart = State("DisplayStart", &enterDisplayStart, &updateDisplayStart, &exitDisplayStart);
-State SettingsStart = State("SettingsStart", &enterSettingsStart, &updateSettingsStart, &exitSettingsStart);
-State SettingsStabilityTime = State("SettingsStabilityTime", &enterSettingsStabilityTime, &updateSettingsStabilityTime, &exitSettingsStabilityTime);
+State DisplayUnknownStart = State("DisplayUnknownStart", DISPLAYUNKNOWNSTART, &updateDisplayUnknownStart);
+State DisplayStart = State("DisplayStart", DISPLAYSTART, &enterDisplayStart, &updateDisplayStart, &exitDisplayStart);
+State SettingsStart = State("SettingsStart", SETTINGSSTART, &enterSettingsStart, &updateSettingsStart, &exitSettingsStart);
+State SettingsStabilityTime = State("SettingsStabilityTime", SETTINGSSTABILITYTIME, &enterSettingsStabilityTime, &updateSettingsStabilityTime, &exitSettingsStabilityTime);
 
 
 /**
@@ -38,14 +38,9 @@ void updateDisplayUnknownStart(FSM *dsm) {
  * DISPLAYSTART -STATE
  * 
 */
-void enterDisplayStart(FSM* dsm) {
-
-
-
-}
+void enterDisplayStart(FSM* dsm) {}
 
 void updateDisplayStart(FSM* dsm) {
-
 
     char key = DISPLAY_GET_KEY;
     
@@ -53,10 +48,61 @@ void updateDisplayStart(FSM* dsm) {
         dsm->transitionTo(SettingsStart);
     }
 
-    dsm->deps->writer->write(
-        dsm->deps->sm->getCurrentState().getStateName(), ""
-    );
-
+    switch (dsm->deps->sm->getCurrentState().getState()) {
+        case UNKNOWNSTART:
+            dsm->deps->writer->write("ATS BOOTING...");
+            break;
+        case NORMAL:
+            dsm->deps->writer->write(
+                (String)"GRID UP    " + dsm->deps->hardware->getVoltageAC(PIN_VOLTAGE_GRID),
+                (String)"GENSET OFF " + dsm->deps->hardware->getVoltageAC(PIN_VOLTAGE_GENERATOR)
+            );
+            break;
+        case NORMAL2:
+            dsm->deps->writer->write(
+                (String)"GRID UP    " + dsm->deps->hardware->getVoltageAC(PIN_VOLTAGE_GRID),
+                (String)"GENSET ON " + dsm->deps->hardware->getVoltageAC(PIN_VOLTAGE_GENERATOR)
+            );
+            break;
+        case STABILITY:
+            dsm->deps->writer->write(
+                (String)"GRID WENT DOWN",   // TODO CRIT if coming from waitgen, wrong text
+                (String)"STABILITY " + dsm->deps->timer->get_remaining_time(STABILITY_TIME)
+            );
+            break;
+        case WAITGEN:
+            dsm->deps->writer->write(
+                dsm->deps->sm->getCurrentState().getStateName()
+            );
+            break;
+        case WARMUP:
+            dsm->deps->writer->write(
+                dsm->deps->sm->getCurrentState().getStateName()
+            );
+            break;
+        case SWITCHDELAYTOGEN:
+            dsm->deps->writer->write(
+                dsm->deps->sm->getCurrentState().getStateName()
+            );
+            break;
+        case SWITCHTOGEN:
+            dsm->deps->writer->write(
+                dsm->deps->sm->getCurrentState().getStateName()
+            );
+            break;
+        case SWITCHDELAYTOGRID:
+            dsm->deps->writer->write(
+                dsm->deps->sm->getCurrentState().getStateName()
+            );
+            break;
+        case DETACHGEN:
+            dsm->deps->writer->write(
+                dsm->deps->sm->getCurrentState().getStateName()
+            );
+            break;
+        default:
+            break;
+    }
 
 }
 

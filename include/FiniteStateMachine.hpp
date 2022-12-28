@@ -65,20 +65,44 @@ struct Deps {
 	#endif
 };
 
+enum States {
+
+	// ATS FSM states
+	UNKNOWNSTART,
+	NORMAL,
+	NORMAL2,
+	STABILITY,
+	WAITGEN,
+	WARMUP,
+	SWITCHDELAYTOGEN,
+	SWITCHTOGEN,
+	SWITCHDELAYTOGRID,
+	DETACHGEN,
+
+	// Display FSM states
+	DISPLAYUNKNOWNSTART,
+	DISPLAYSTART,
+	SETTINGSSTART,
+	SETTINGSSTABILITYTIME,
+
+};
+
 //define the functionality of the states
 class State {
 	public:
 		#ifdef UNIT_TEST
-		State( string stateName, void (*updateFunction)(FiniteStateMachine*));
-		State( string stateName, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) );
+		State( string stateName, States estate, void (*updateFunction)(FiniteStateMachine*));
+		State( string stateName, States estate, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) );
 		#else
-		State( String stateName, void (*updateFunction)(FiniteStateMachine*));
-		State( String stateName, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) );
+		State( String stateName, States estate, void (*updateFunction)(FiniteStateMachine*));
+		State( String stateName, States estate, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) );
 		#endif
 
 		void enter(FiniteStateMachine *fsm);
 		void update(FiniteStateMachine *fsm);
 		void exit(FiniteStateMachine *fsm);
+
+		States getState();
 
 		#ifdef UNIT_TEST
 		string getStateName();
@@ -86,6 +110,7 @@ class State {
 		String getStateName();
 		#endif
 	private:
+		States estate;
 		#ifdef UNIT_TEST
 		string stateName;
 		#else
