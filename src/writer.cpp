@@ -164,6 +164,7 @@ int Writer::write(String row, String second_row = "") {
 
     if (this->variables.first.start_index == -1) {
         this->variables.first.exists = false;
+        this->row = row;
     } else {
         this->variables.first.end_index = 
             this->variables.first.start_index;  // length value + end mark = 2 chars
@@ -189,6 +190,7 @@ int Writer::write(String row, String second_row = "") {
 
     if (this->variables.second.start_index == -1) {
         this->variables.second.exists = false;
+        this->second_row = second_row;
     } else {
         this->variables.second.end_index = 
             this->variables.second.start_index;  // length value + end mark = 2 chars
