@@ -20,12 +20,12 @@ void updateDisplayUnknownStart(FSM *dsm) {
     
     // Show startup screen
     dsm->deps->writer->write("AUTOMATIC", "TRANSFER SWITCH");
-    delay(2000);
+    // delay(2000);
     dsm->deps->writer->write(
         "VERSION " + (String)SW_VERSION,
         "K&I ENT."
     );
-    delay(1000);
+    // delay(1000);
     dsm->deps->writer->clear();
 
     // This is update - immediately transfer me away from here
@@ -53,22 +53,31 @@ void updateDisplayStart(FSM* dsm) {
             dsm->deps->writer->write("ATS BOOTING...");
             break;
         case NORMAL:
-            dsm->deps->writer->write(
-                (String)"GRID UP    " + dsm->deps->hardware->getVoltageAC(PIN_VOLTAGE_GRID),
-                (String)"GENSET OFF " + dsm->deps->hardware->getVoltageAC(PIN_VOLTAGE_GENERATOR)
+            dsm->deps->writer->setMode(RAW);
+                dsm->deps->writer->write(
+                (String)"GRID UP     " + dsm->deps->hardware->getVoltageAC(PIN_VOLTAGE_GRID) + "V",
+                (String)"GENSET DOWN " + dsm->deps->hardware->getVoltageAC(PIN_VOLTAGE_GENERATOR) + "V"
             );
             break;
         case NORMAL2:
             dsm->deps->writer->write(
-                (String)"GRID UP    " + dsm->deps->hardware->getVoltageAC(PIN_VOLTAGE_GRID),
-                (String)"GENSET ON " + dsm->deps->hardware->getVoltageAC(PIN_VOLTAGE_GENERATOR)
+                (String)"GRID UP ABCD    " + dsm->deps->hardware->getVoltageAC(PIN_VOLTAGE_GRID) + "V",
+                (String)"GENSET UP   " + dsm->deps->hardware->getVoltageAC(PIN_VOLTAGE_GENERATOR) + "V"
             );
             break;
         case STABILITY:
-            dsm->deps->writer->write(
-                (String)"GRID WENT DOWN",   // TODO CRIT if coming from waitgen, wrong text
-                (String)"STABILITY " + dsm->deps->timer->get_remaining_time(STABILITY_TIME)
-            );
+            if (dsm->deps->hardware->getVoltageAC(PIN_VOLTAGE_GRID) < SETTING_MIN_VOLTAGE_THRESHOLD) {
+                dsm->deps->writer->write(
+                    (String)"GRID WENT DOWN - STARTING GENSET IF NO POWER RESTORE",
+                    (String)"STABILITY " + dsm->deps->timer->get_remaining_time(STABILITY_TIME)
+                );
+            } else {
+                dsm->deps->writer->write(
+                    (String)"MEASURING GRID STABILITY",
+                    (String)"STABILITY " + dsm->deps->timer->get_remaining_time(STABILITY_TIME)
+                );
+            }
+            
             break;
         case WAITGEN:
             dsm->deps->writer->write(
@@ -115,9 +124,10 @@ void exitDisplayStart(FSM* dsm) {}
 */
 void enterSettingsStart(FSM* dsm) {
 
+    dsm->deps->writer->clear();
     dsm->deps->writer->write(
         ">>> SETTINGS <<<",
-        "Press #- to navigate"
+        "Press #- to cycle settings or *- to quit"
     );
 
 }
@@ -127,6 +137,10 @@ void updateSettingsStart(FSM* dsm) {
     char key = DISPLAY_GET_KEY;
 
     if (key == '#') {
+        dsm->transitionTo(DisplayStart);
+    }
+
+    if (key == '*') {
         dsm->transitionTo(DisplayStart);
     }
 
@@ -141,6 +155,7 @@ void exitSettingsStart(FSM* dsm) {}
 */
 void enterSettingsStabilityTime(FSM* dsm) {
 
+    dsm->deps->writer->clear();
     dsm->deps->writer->write(
         ">>> SETTINGS <<<",
         "Press #- to navigate"

@@ -5,7 +5,6 @@
 #include <Arduino.h>
 #include <LiquidCrystal.h>
 
-
 #define DISPLAY_WIDTH 16
 #define DISPLAY_UPDATE_INTERVAL 200
 
@@ -20,6 +19,20 @@ enum writeRow {
     AUTO,
     FIRST,
     SECOND
+};
+
+struct Variable {
+    String variable;
+    bool exists;
+    int length;
+    int start_index;
+    int end_index;
+    int initial_length;
+};
+
+struct Variables {
+    Variable first;
+    Variable second;
 };
 
 class Writer {
@@ -42,8 +55,10 @@ class Writer {
         int clear();
         int write(String row);
         int write(String row, String second_row);
+        int variable(writeRow row, String var);
         int update();
         int set_write_to_row(writeRow new_write_row);
+        Variables variables;
 };
 
 #endif  // UNIT_TEST
