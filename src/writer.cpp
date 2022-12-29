@@ -6,7 +6,10 @@
 
 int Writer::update() {
 
-    if (this->row_roll == false && this->second_row_roll == false) {
+    if (
+        (this->row_roll == false && this->second_row_roll == false) &&
+        (this->variables.first.exists == false && this->variables.second.exists == false)
+    ) {
         return 0;
     }
 
@@ -130,7 +133,7 @@ int Writer::write(String row) {
     this->write(row, "");
 }
 
-String variableToRow(Writer *w, writeRow row_select, String text, String variable) {
+String variableToRow(Writer *w, writeRow row_select, int characters, String text, String variable) {
     
     if (row_select == FIRST) {
         return (String)
@@ -140,7 +143,7 @@ String variableToRow(Writer *w, writeRow row_select, String text, String variabl
             ) +
             variable +   // Placeholder for variable that is not told
             text.substring(
-                w->variables.first.end_index + 1,
+                w->variables.first.end_index + characters,
                 w->variables.first.initial_length
         );
     }
@@ -152,7 +155,7 @@ String variableToRow(Writer *w, writeRow row_select, String text, String variabl
         ) +
         variable +   // Placeholder for variable that is not told
         text.substring(
-            w->variables.second.end_index + 1,
+            w->variables.second.end_index + characters,
             w->variables.second.initial_length
     );
 }
@@ -171,15 +174,20 @@ int Writer::write(String row, String second_row = "") {
 
         this->variables.first.length = (int)row.charAt(this->variables.first.start_index + 1) - '0';
 
-        this->variables.first.initial_length = row.length() - 2;
+        this->variables.first.initial_length = row.length();
 
         this->variables.first.exists = true;
+
+        String v = "";
+        for (int i = 0; i < this->variables.first.length; i++) {
+            v += " ";
+        }
 
         this->row = (String)(row.substring(
             0,
             this->variables.first.start_index
         ) +
-        " " +   // Placeholder for variable that is not told
+        v +   // Placeholder for variable that is not told
         row.substring(
             this->variables.first.end_index + 3,
             row.length()
@@ -197,15 +205,20 @@ int Writer::write(String row, String second_row = "") {
 
         this->variables.second.length = (int)second_row.charAt(this->variables.second.start_index + 1) - '0';
 
-        this->variables.second.initial_length = second_row.length() - 2;
+        this->variables.second.initial_length = second_row.length();
 
         this->variables.second.exists = true;
+
+        String v = "";
+        for (int i = 0; i < this->variables.second.length; i++) {
+            v += " ";
+        }
 
         this->second_row = (String)(second_row.substring(
             0,
             this->variables.second.start_index
         ) +
-        " " +   // Placeholder for variable that is not told
+        v +   // Placeholder for variable that is not told
         second_row.substring(
             this->variables.second.end_index + 3,
             second_row.length()
@@ -264,7 +277,7 @@ int Writer::write(String row, String second_row = "") {
         
         // Text align center
         case MIDDLE:
-            if (row.length() > DISPLAY_WIDTH) {
+            if (this->row.length() > DISPLAY_WIDTH) {
                 this->lcd->setCursor(
                     index + 4,
                     0
@@ -278,13 +291,10 @@ int Writer::write(String row, String second_row = "") {
             this->lcd->print(this->row.substring(0, DISPLAY_WIDTH));
             // Save the starting postion for the first row text
             this->row_index = index + 4;
-            if (this->variables.first.exists == false) {
-                this->row = row;
-            }
 
             // Check whether there is the second row to be writed
-            if (second_row.length() != 0) {
-                if (second_row.length() > DISPLAY_WIDTH) {
+            if (this->second_row.length() != 0) {
+                if (this->second_row.length() > DISPLAY_WIDTH) {
                     this->lcd->setCursor(
                         index_second + 4,
                         1
@@ -295,11 +305,7 @@ int Writer::write(String row, String second_row = "") {
                         1
                     );
                 }
-                this->lcd->print(second_row.substring(0, DISPLAY_WIDTH));
-                // Save the second row text if not rolling
-                if (this->variables.second.exists == false) {
-                    this->second_row = second_row;
-                }
+                this->lcd->print(this->second_row.substring(0, DISPLAY_WIDTH));
                 // Save the second row staring index
                 this->second_row_index = index_second + 4;
             }
@@ -319,25 +325,12 @@ int Writer::write(String row, String second_row = "") {
 
 int Writer::variable(writeRow row_select, String var) {
 
-
     if (row_select == FIRST) {
-
-        // Check if the incoming var is longer than space
+        // TODO Check if the incoming var is longer than space
         // reserved for it
-        if (var.length() > this->variables.first.length) {
-            return -1;
-        }
-
-        this->row = variableToRow(this, row_select, this->row, var);
-
+        this->row = variableToRow(this, row_select, this->variables.first.length, this->row, var);
     } else {
-
-        if (var.length() > this->variables.second.length) {
-            return -1;
-        }
-
-        this->second_row = variableToRow(this, row_select, this->second_row, var);
-        
+        this->second_row = variableToRow(this, row_select, this->variables.second.length, this->second_row, var);
     }
 }
 
