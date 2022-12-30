@@ -14,6 +14,7 @@
 #include "states.h"
 #include "FiniteStateMachine.hpp"   // for Deps
 #include "display.h"
+#include "settings.h"
 
 
 // Display contacts: VSS=GND, VDD=5V, RW=GND, A=5V(VIA 220OHM RESISTOR), K=GND 
@@ -58,13 +59,18 @@ Deps displayFSMDeps = {
 extern State DisplayUnknownStart;
 FSM display = FSM(DisplayUnknownStart, &displayFSMDeps);
 
-
-
+byte generator_icon[8] = {B00000, B11111, B10011, B11111, B10101, B11111, B10011};
+byte load_icon[8] = {B00000, B00100, B01110, B11111, B11111, B11011, B11011};
+byte grid_icon[8] = {B10001, B11111, B10001, B10001, B10001, B10001, B10001, B10001};
 
 
 void setup() {
     Serial.begin(115200);
     lcd.begin(DISPLAY_WIDTH, 2);
+
+    lcd.createChar(ICON_GRID, grid_icon);
+    lcd.createChar(ICON_GENERATOR, generator_icon);
+    lcd.createChar(ICON_LOAD, load_icon);
 
     lcd.clear();
     lcd.setCursor(0, 0);

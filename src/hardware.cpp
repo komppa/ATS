@@ -65,6 +65,18 @@ int Hardware::getVoltageAC(uint8_t pin) {
     #endif
 }
 
+bool Hardware::isSimulator() {
+    #ifdef ARDUINO
+    if (digitalRead(PIN_IS_SIMULATOR) == 0) {
+        return true;
+    }
+    return false;
+    #else
+    return false;
+    #endif  // ARDUINO
+
+}
+
 // TODO digitalRead
 // TODO digitalWrite
 // TODO analogRead

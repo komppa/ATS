@@ -96,12 +96,13 @@ FiniteStateMachine::FiniteStateMachine(State& current, Deps *deps){
 	this->needToTriggerEnter = true;
 	this->currentState = this->nextState = &current;
 	this->stateChangeTime = 0;
+	this->stateChangePending = true;
 }
 
 FiniteStateMachine& FiniteStateMachine::update() {
 	//simulate a transition to the first state
 	//this only happens the first time update is called
-	if (this->needToTriggerEnter) { 
+	if (this->needToTriggerEnter) {
 		this->currentState->enter(this);
 		this->needToTriggerEnter = false;
 	} else {
@@ -120,6 +121,8 @@ FiniteStateMachine& FiniteStateMachine::transitionTo(State& state){
 }
 
 FiniteStateMachine& FiniteStateMachine::immediateTransitionTo(State& state){
+	// Mark that state has been changed
+	this->stateChangePending = true;
 	this->currentState->exit(this);
 	this->currentState = this->nextState = &state;
 	this->currentState->enter(this);
@@ -129,6 +132,14 @@ FiniteStateMachine& FiniteStateMachine::immediateTransitionTo(State& state){
 
 Deps* FiniteStateMachine::getDeps() {
 	return this->deps;
+}
+
+bool FiniteStateMachine::changePending() {
+	return this->stateChangePending;
+}
+
+void FiniteStateMachine::clearPendingFlag() {
+	this->stateChangePending = false;
 }
 
 //return the current state

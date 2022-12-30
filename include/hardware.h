@@ -68,6 +68,7 @@ class Hardware {
         virtual void wait(unsigned long ms);
         // Voltage sensor to be able to mocked
         virtual int getVoltageAC(uint8_t pin);
+        virtual bool isSimulator();
 };
 
 #ifdef UNIT_TEST

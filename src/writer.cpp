@@ -134,6 +134,10 @@ int Writer::write(String row) {
 }
 
 String variableToRow(Writer *w, writeRow row_select, int characters, String text, String variable) {
+
+    // If lenght of injectable characters are over 3 (over default chars "{N}")
+    // lenght must be extended from the end
+    // See: line 153.
     
     if (row_select == FIRST) {
         return (String)
@@ -144,7 +148,7 @@ String variableToRow(Writer *w, writeRow row_select, int characters, String text
             variable +   // Placeholder for variable that is not told
             text.substring(
                 w->variables.first.end_index + characters,
-                w->variables.first.initial_length
+                w->variables.first.initial_length + (characters - 3)  // Extend end of the string
         );
     }
 

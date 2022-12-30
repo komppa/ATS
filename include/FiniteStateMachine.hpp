@@ -85,6 +85,9 @@ enum States {
 	SETTINGSSTART,
 	SETTINGSSTABILITYTIME,
 
+	// TODO Writer states
+	// ....
+
 };
 
 //define the functionality of the states
@@ -133,6 +136,9 @@ class FiniteStateMachine {
 		State& getCurrentState();
 		Deps* getDeps();
 
+		bool changePending();
+		void clearPendingFlag();
+
 		Deps *deps;
 
 		/// boolean isInState( State &state ) const;
@@ -145,6 +151,7 @@ class FiniteStateMachine {
 		State* 	currentState;
 		State* 	nextState;
 		unsigned long stateChangeTime;
+		bool stateChangePending;
 };
 
 #endif
