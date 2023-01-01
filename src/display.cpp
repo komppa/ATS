@@ -12,21 +12,99 @@ State SettingsStart = State("SettingsStart", SETTINGSSTART, &enterSettingsStart,
 State SettingsStabilityTime = State("SettingsStabilityTime", SETTINGSSTABILITYTIME, &enterSettingsStabilityTime, &updateSettingsStabilityTime, &exitSettingsStabilityTime);
 
 
+void drawTemplate(Writer *writer, Hardware *hardware, State *state) {
+    switch (state->getState()) {
+        case UNKNOWNSTART:
+            writer->write("ATS BOOTING {5}", "{5}");
+            break;
+        case NORMAL:
+            writer->write(
+                "# GRID UP   {3}V",
+                "% GEN DOWN  {3}V"
+            );
+            break;
+        case NORMAL2:
+            writer->write(
+                "# GRID UP   {3}V",
+                "% GEN UP    {3}V"
+            );
+            break;
+        case STABILITY:
+            writer->setMode(MIDDLE);
+            if (hardware->getVoltageAC(PIN_VOLTAGE_GRID) < SETTING_MIN_VOLTAGE_THRESHOLD) {
+                writer->write(
+                    "GRID WENT DOWN! CHECKING STABILITY IN:",
+                    "{3}S"
+                );
+                return;
+            }
+            writer->write(
+                "RESTORING GRID! CHECKING STABILITY IN:",
+                "{3}S"
+            );
+            
+            break;
+        case WAITGEN:
+            writer->setMode(MIDDLE);
+            writer->write(
+                "WAITING GEN TO BE STARTED",
+                "OR  GRID TO BE RESTORED"
+            );
+            break;
+        case WARMUP:
+            writer->write(
+                "WAITING GEN TO WARM UP",
+                "{3}S"
+            );
+            break;
+        case SWITCHDELAYTOGEN:
+            writer->write(
+                "TRANSFER DELAY",
+                "{3}S"
+            );
+            break;
+        case SWITCHTOGEN:
+            writer->write(
+                "* NOW USING GENERATOR *",
+                "SWITCHING BACK TO GRID IF RESTORES"
+            );
+            break;
+        case SWITCHDELAYTOGRID:
+            writer->write(
+                "TRANSFER DELAY",
+                "{3}S"
+            );
+            break;
+        case DETACHGEN:
+            writer->write(
+                " {3}",
+                " {3}"
+            );
+            break;
+        default:
+            writer->write((String)"STATE \"" + state->getStateName() + "\" {5}", "IS UNKNOWN, BUG? {5}");
+            break;
+    }
+}
+
 /**
  * DISPLAYUNKNOWNSTART -STATE
  * 
 */
 void updateDisplayUnknownStart(FSM *dsm) {
     
-    // Show startup screen
-    dsm->deps->writer->write("AUTOMATIC", "TRANSFER SWITCH");
-    delay(2000);
-    dsm->deps->writer->write(
-        "VERSION " + (String)SW_VERSION,
-        "K&I ENT."
-    );
-    delay(1000);
-    dsm->deps->writer->clear();
+    // Show startup screen if is not a simulator
+    if (dsm->deps->hardware->isSimulator() == false) {
+        dsm->deps->writer->write("AUTOMATIC", "TRANSFER SWITCH");
+        delay(2000);
+        dsm->deps->writer->write(
+            "VERSION " + (String)SW_VERSION,
+            "K&I ENT."
+        );
+        delay(1000);
+        dsm->deps->writer->clear();
+    }
+    
 
     // This is update - immediately transfer me away from here
     dsm->immediateTransitionTo(DisplayStart);
@@ -38,9 +116,46 @@ void updateDisplayUnknownStart(FSM *dsm) {
  * DISPLAYSTART -STATE
  * 
 */
-void enterDisplayStart(FSM* dsm) {}
+void enterDisplayStart(FSM* dsm) {
+
+    dsm->deps->writer->setMode(RAW);
+
+    // switch (dsm->deps->sm->getCurrentState().getState())
+    // {
+    // case NORMAL:
+    //     dsm->deps->writer->write(
+    //         "GRID UP {5} V",
+    //         "GENSET DOWN {3} V"
+    //     );
+    //     break;
+    // case NORMAL2:
+    //     dsm->deps->writer->write(
+    //         "GRID UP {3} V",
+    //         "GENSET UP {3} V"
+    //     );
+    //     break;   
+    // case STABILITY:
+    //     dsm->deps->writer->write(
+    //         "GRID WENT DOWN - STARTING GENSET IF NO POWER RESTORE",
+    //         "STABILITY {1}"
+    //     );
+    
+    // default:
+    //     break;
+    // }
+    
+}
 
 void updateDisplayStart(FSM* dsm) {
+
+    if (dsm->deps->sm->changePending() == true) {
+        drawTemplate(
+            dsm->deps->writer,
+            dsm->deps->hardware,
+            &dsm->deps->sm->getCurrentState()
+        );
+        dsm->deps->sm->clearPendingFlag();
+    }
 
     char key = DISPLAY_GET_KEY;
     
@@ -53,61 +168,54 @@ void updateDisplayStart(FSM* dsm) {
             dsm->deps->writer->write("ATS BOOTING...");
             break;
         case NORMAL:
-            dsm->deps->writer->setMode(RAW);
-                dsm->deps->writer->write(
-                (String)"GRID UP     " + dsm->deps->hardware->getVoltageAC(PIN_VOLTAGE_GRID) + "V",
-                (String)"GENSET DOWN " + dsm->deps->hardware->getVoltageAC(PIN_VOLTAGE_GENERATOR) + "V"
+            dsm->deps->writer->variable(
+                FIRST,
+                (String)dsm->deps->hardware->getVoltageAC(PIN_VOLTAGE_GRID)
+            );
+            dsm->deps->writer->variable(
+                SECOND,
+                (String)dsm->deps->hardware->getVoltageAC(PIN_VOLTAGE_GENERATOR)
             );
             break;
         case NORMAL2:
-            dsm->deps->writer->write(
-                (String)"GRID UP ABCD    " + dsm->deps->hardware->getVoltageAC(PIN_VOLTAGE_GRID) + "V",
-                (String)"GENSET UP   " + dsm->deps->hardware->getVoltageAC(PIN_VOLTAGE_GENERATOR) + "V"
+            dsm->deps->writer->variable(
+                FIRST,
+                (String)dsm->deps->hardware->getVoltageAC(PIN_VOLTAGE_GRID)
+            );
+            dsm->deps->writer->variable(
+                SECOND,
+                (String)dsm->deps->hardware->getVoltageAC(PIN_VOLTAGE_GENERATOR)
             );
             break;
         case STABILITY:
-            if (dsm->deps->hardware->getVoltageAC(PIN_VOLTAGE_GRID) < SETTING_MIN_VOLTAGE_THRESHOLD) {
-                dsm->deps->writer->write(
-                    (String)"GRID WENT DOWN - STARTING GENSET IF NO POWER RESTORE",
-                    (String)"STABILITY " + dsm->deps->timer->get_remaining_time(STABILITY_TIME)
-                );
-            } else {
-                dsm->deps->writer->write(
-                    (String)"MEASURING GRID STABILITY",
-                    (String)"STABILITY " + dsm->deps->timer->get_remaining_time(STABILITY_TIME)
-                );
-            }
-            
-            break;
-        case WAITGEN:
-            dsm->deps->writer->write(
-                dsm->deps->sm->getCurrentState().getStateName()
+            dsm->deps->writer->variable(
+                SECOND,
+                (String)dsm->deps->timer->get_remaining_time(STABILITY_TIME)        
             );
             break;
+        case WAITGEN:
+            break;
         case WARMUP:
-            dsm->deps->writer->write(
-                dsm->deps->sm->getCurrentState().getStateName()
+            dsm->deps->writer->variable(
+                SECOND,
+                (String)dsm->deps->timer->get_remaining_time(WARM_UP_TIME)
             );
             break;
         case SWITCHDELAYTOGEN:
-            dsm->deps->writer->write(
-                dsm->deps->sm->getCurrentState().getStateName()
+            dsm->deps->writer->variable(
+                SECOND,
+                (String)dsm->deps->timer->get_remaining_time(SWITCHING_DELAY)
             );
             break;
         case SWITCHTOGEN:
-            dsm->deps->writer->write(
-                dsm->deps->sm->getCurrentState().getStateName()
-            );
             break;
         case SWITCHDELAYTOGRID:
-            dsm->deps->writer->write(
-                dsm->deps->sm->getCurrentState().getStateName()
+            dsm->deps->writer->variable(
+                SECOND,
+                (String)dsm->deps->timer->get_remaining_time(SWITCHING_DELAY)
             );
             break;
         case DETACHGEN:
-            dsm->deps->writer->write(
-                dsm->deps->sm->getCurrentState().getStateName()
-            );
             break;
         default:
             break;
