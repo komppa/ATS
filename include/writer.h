@@ -4,6 +4,7 @@
 #ifndef UNIT_TEST
 #include <Arduino.h>
 #include <LiquidCrystal.h>
+#include "settings.h"
 
 #define DISPLAY_WIDTH 16
 #define DISPLAY_UPDATE_INTERVAL 200
@@ -55,6 +56,7 @@ class Writer {
         int clear();
         int write(String row);
         int write(String row, String second_row);
+        String variableToRow(writeRow row_select, int characters, String text, String variable);
         int variable(writeRow row, String var);
         int update();
         int set_write_to_row(writeRow new_write_row);

@@ -18,13 +18,8 @@ int Writer::update() {
 
         this->lcd->clear();
     
-        // Does the first row need a roll
-        // TODO implement
-
         // Does the first row need rolling
         if (this->row.length() > DISPLAY_WIDTH) {
-            // "Bounce" protection
-            // if ((this->last_update + 250) <= millis()) {
 
             if (this->row_index == (signed int)((-1) * this->row.length())) {
                 this->row_index = DISPLAY_WIDTH - 1;
@@ -50,11 +45,36 @@ int Writer::update() {
             }
 
         } else {
+            String row_cut;
             // Scrolling not required for the first row.
             // Still, redraw everything for the first row since
             // everything is cleared on screen on every update.
-            this->lcd->setCursor(floor((DISPLAY_WIDTH - row.length()) / 2 ), 0);
-            this->lcd->print(this->row);
+            // Since dynamic variables can be injected to display,
+            // this method is executed even if mode is RAW and scrolling
+            // is not required. Because of that:
+            // Check whether staticish text should start from left (RAW) or middle
+            if (this->mode == MIDDLE) {
+                this->lcd->setCursor(floor((DISPLAY_WIDTH - row.length()) / 2 ), 0);
+            } else {
+                this->lcd->setCursor(0, 0);
+            }
+            
+            if (this->row[0] == '#') {
+                this->lcd->write(byte(ICON_GRID));
+                // Remove grid mark from string since icon has been writed
+                // to the screen
+                row_cut = this->row.substring(1);
+            } else if (this->row[0] == '%') {
+                this->lcd->write(byte(ICON_GENERATOR));
+                row_cut = this->row.substring(1);
+            } else if (this->row[0] == '&') {
+                this->lcd->write(byte(ICON_LOAD));
+                row_cut = this->row.substring(1);
+            } else {
+                row_cut = this->row;
+            }
+
+            this->lcd->print(row_cut);
         }
 
         // Does the second row need rolling
@@ -86,11 +106,32 @@ int Writer::update() {
         
 
         } else {
+            String secondrow_cut;
             // Scrolling not required for the second row.
             // Still, redraw everything for the second row since
             // everything is cleared on screen on every update.
-            this->lcd->setCursor(floor((DISPLAY_WIDTH - second_row.length()) / 2 ), 1);
-            this->lcd->print(this->second_row);
+            if (this->mode == MIDDLE) {
+                this->lcd->setCursor(floor((DISPLAY_WIDTH - second_row.length()) / 2 ), 1);
+            } else {
+                this->lcd->setCursor(0, 1);
+            }
+
+            if (this->second_row[0] == '#') {
+                this->lcd->write(byte(ICON_GRID));
+                // Remove grid mark from string since icon has been writed
+                // to the screen
+                secondrow_cut = this->second_row.substring(1);
+            } else if (this->second_row[0] == '%') {
+                this->lcd->write(byte(ICON_GENERATOR));
+                secondrow_cut = this->second_row.substring(1);
+            } else if (this->second_row[0] == '&') {
+                this->lcd->write(byte(ICON_LOAD));
+                secondrow_cut = this->second_row.substring(1);
+            } else {
+                secondrow_cut = this->second_row;
+            }
+            
+            this->lcd->print(secondrow_cut);
         }
 
         this->last_update = millis();
@@ -133,34 +174,47 @@ int Writer::write(String row) {
     this->write(row, "");
 }
 
-String variableToRow(Writer *w, writeRow row_select, int characters, String text, String variable) {
+String Writer::variableToRow(writeRow row_select, int characters, String text, String variable) {
 
     // If lenght of injectable characters are over 3 (over default chars "{N}")
     // lenght must be extended from the end
     // See: line 153.
-    
+
+    // Add leading "zero" (empty chars) if input variable is shorter
+    // than the reserved length for it
+    String padded_variable = "";
+
+    if (variable.length() < characters) {
+        for (int i = 0; i < (characters - variable.length()); i++) {
+            padded_variable += " ";
+        }
+        padded_variable += variable;
+    } else {
+        padded_variable = variable;
+    }
+
     if (row_select == FIRST) {
         return (String)
             text.substring(
                 0,
-                w->variables.first.start_index
+                this->variables.first.start_index
             ) +
-            variable +   // Placeholder for variable that is not told
+            padded_variable +   // Placeholder for variable that is not told
             text.substring(
-                w->variables.first.end_index + characters,
-                w->variables.first.initial_length + (characters - 3)  // Extend end of the string
-        );
+                this->variables.first.end_index + characters,
+                this->variables.first.initial_length + (characters - 3)  // Extend end of the string
+            );
     }
 
     return (String)
         text.substring(
             0,
-            w->variables.second.start_index
+            this->variables.second.start_index
         ) +
-        variable +   // Placeholder for variable that is not told
+        padded_variable +   // Placeholder for variable that is not told
         text.substring(
-            w->variables.second.end_index + characters,
-            w->variables.second.initial_length
+            this->variables.second.end_index + characters,
+            this->variables.second.initial_length
     );
 }
 
@@ -263,18 +317,42 @@ int Writer::write(String row, String second_row = "") {
 
     if (second_row.length() > DISPLAY_WIDTH) index_second = 0;
     
+    String row_cut;
+    String secondrow_cut;
     
     switch (this->mode) {
 
         // Just write start of the screen
         case RAW:
             this->lcd->setCursor(0,0);
-            this->lcd->print(this->row.substring(0, DISPLAY_WIDTH));
+            if (this->row[0] == '#') {
+                this->lcd->write(byte(ICON_GRID));
+                // Remove grid mark from string since icon has been writed
+                // to the screen
+                row_cut = this->row.substring(1);
+            } else if (this->row[0] == '%') {
+                this->lcd->write(byte(ICON_GENERATOR));
+                row_cut = this->row.substring(1);
+            } else if (this->row[0] == '&') {
+                this->lcd->write(byte(ICON_LOAD));
+                row_cut = this->row.substring(1);
+            }
+            this->lcd->print(row_cut.substring(0, DISPLAY_WIDTH));
 
             // Check whether there is the second row to be writed
             if (second_row.length() != 0) {
                 this->lcd->setCursor(0,1);
-                this->lcd->print(second_row);
+                if (this->second_row[0] == '#') {
+                    this->lcd->write(byte(ICON_GRID));
+                    secondrow_cut = this->second_row.substring(1);
+                } else if (this->second_row[0] == '%') {
+                    this->lcd->write(byte(ICON_GENERATOR));
+                    secondrow_cut = this->second_row.substring(1);
+                } else if (this->second_row[0] == '&') {
+                    this->lcd->write(byte(ICON_LOAD));
+                    secondrow_cut = this->second_row.substring(1);
+                }
+                this->lcd->print(secondrow_cut.substring(0, DISPLAY_WIDTH));
             }
 
             break;
@@ -320,21 +398,23 @@ int Writer::write(String row, String second_row = "") {
         default:
             break;
 
-        return 0;
-
     }
+    
+    return 0;
   
 }
 
 
 int Writer::variable(writeRow row_select, String var) {
 
+    // TODO is there any reserved space for showing deynamic variable
+    
     if (row_select == FIRST) {
         // TODO Check if the incoming var is longer than space
         // reserved for it
-        this->row = variableToRow(this, row_select, this->variables.first.length, this->row, var);
+        this->row = variableToRow(row_select, this->variables.first.length, this->row, var);
     } else {
-        this->second_row = variableToRow(this, row_select, this->variables.second.length, this->second_row, var);
+        this->second_row = variableToRow(row_select, this->variables.second.length, this->second_row, var);
     }
 }
 

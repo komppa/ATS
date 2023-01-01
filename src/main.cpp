@@ -75,7 +75,7 @@ void setup() {
     lcd.clear();
     lcd.setCursor(0, 0);
 
-    writer.setMode(MIDDLE);
+    writer.setMode(RAW);
 
     // For checking whether this is simulator in runtime
     pinMode(PIN_IS_SIMULATOR, INPUT_PULLUP);
@@ -105,7 +105,7 @@ void loop() {
     // TODO wait few seconds before starting screen refreshing on startup
     // to ensure that electricity can be flowed from grid as fast as possible.
     if (millis() > 1000) display.update();
-    
+
 }
 
 
