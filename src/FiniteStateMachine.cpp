@@ -94,7 +94,7 @@ String State::getStateName()
 FiniteStateMachine::FiniteStateMachine(State& current, Deps *deps){
 	this->deps = deps;
 	this->needToTriggerEnter = true;
-	this->currentState = this->nextState = &current;
+	this->currentState = this->previousState = this->nextState = &current;
 	this->stateChangeTime = 0;
 	this->stateChangePending = true;
 }
@@ -124,6 +124,7 @@ FiniteStateMachine& FiniteStateMachine::immediateTransitionTo(State& state){
 	// Mark that state has been changed
 	this->stateChangePending = true;
 	this->currentState->exit(this);
+	this->previousState = this->currentState;
 	this->currentState = this->nextState = &state;
 	this->currentState->enter(this);
 	this->stateChangeTime = this->deps->hardware->time();
@@ -132,6 +133,14 @@ FiniteStateMachine& FiniteStateMachine::immediateTransitionTo(State& state){
 
 Deps* FiniteStateMachine::getDeps() {
 	return this->deps;
+}
+
+State* FiniteStateMachine::getPreviousState() {
+	return this->previousState;
+}
+
+void FiniteStateMachine::forceTemplateReDraw() {
+	this->stateChangePending = true;
 }
 
 bool FiniteStateMachine::changePending() {

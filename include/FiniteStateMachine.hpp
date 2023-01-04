@@ -40,6 +40,7 @@
 // Include for deps if building for atmega2560
 #include <Keypad.h>
 #include "writer.h"
+#include "settings.h"
 #endif // UNIT_TEST
 
 using namespace std;
@@ -62,6 +63,7 @@ struct Deps {
 	Keypad *keypad;
 	Writer *writer;
 	FiniteStateMachine *sm;	// ATS FSM for display FSM
+	Settings *settings;
 	#endif
 };
 
@@ -83,7 +85,11 @@ enum States {
 	DISPLAYUNKNOWNSTART,
 	DISPLAYSTART,
 	SETTINGSSTART,
+	SETTINGSMANUALDRIVE,
 	SETTINGSSTABILITYTIME,
+	SETTINGSSWITCHINGDELAY,
+	SETTINGSWARMUPTIME,
+	SETTINGSINPUT
 
 	// TODO Writer states
 	// ....
@@ -134,7 +140,10 @@ class FiniteStateMachine {
 		FiniteStateMachine& immediateTransitionTo( State& state );
 		
 		State& getCurrentState();
+		State* getPreviousState();
 		Deps* getDeps();
+
+		void forceTemplateReDraw();
 
 		bool changePending();
 		void clearPendingFlag();
@@ -148,6 +157,7 @@ class FiniteStateMachine {
 		
 	private:
 		bool 	needToTriggerEnter;
+		State*	previousState;
 		State* 	currentState;
 		State* 	nextState;
 		unsigned long stateChangeTime;

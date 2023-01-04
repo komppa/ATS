@@ -9,7 +9,11 @@
 State DisplayUnknownStart = State("DisplayUnknownStart", DISPLAYUNKNOWNSTART, &updateDisplayUnknownStart);
 State DisplayStart = State("DisplayStart", DISPLAYSTART, &enterDisplayStart, &updateDisplayStart, &exitDisplayStart);
 State SettingsStart = State("SettingsStart", SETTINGSSTART, &enterSettingsStart, &updateSettingsStart, &exitSettingsStart);
+State SettingsManualDrive = State("SettingsManualDrive", SETTINGSMANUALDRIVE, &enterManualDrive, &updateManualDrive, &exitManualDrive);
 State SettingsStabilityTime = State("SettingsStabilityTime", SETTINGSSTABILITYTIME, &enterSettingsStabilityTime, &updateSettingsStabilityTime, &exitSettingsStabilityTime);
+State SettingsSwitchingDelay = State("SettingsSwitchingDelay", SETTINGSSWITCHINGDELAY, &enterSwitchingDelay, &updateSwitchingDelay, &exitSwitchingDelay);
+State SettingsWarmUpTime = State("SettingsWarmUpTime", SETTINGSWARMUPTIME, &enterWarmUpTime, &updateWarmUpTime, &exitWarmUpTime);
+State SettingsInput = State("SettingsInput", SETTINGSINPUT, &enterSettingsInput, &updateSettingsInput, &exitSettingsInput);
 
 
 void drawTemplate(Writer *writer, Hardware *hardware, State *state) {
@@ -87,6 +91,24 @@ void drawTemplate(Writer *writer, Hardware *hardware, State *state) {
     }
 }
 
+bool key_is_number(char key) {
+    if (
+        key == '0' ||
+        key == '1' ||
+        key == '2' ||
+        key == '3' ||
+        key == '4' ||
+        key == '5' ||
+        key == '6' ||
+        key == '7' ||
+        key == '8' ||
+        key == '9'
+    ) {
+        return true;
+    }
+    return false;
+}
+
 /**
  * DISPLAYUNKNOWNSTART -STATE
  * 
@@ -95,6 +117,7 @@ void updateDisplayUnknownStart(FSM *dsm) {
     
     // Show startup screen if is not a simulator
     if (dsm->deps->hardware->isSimulator() == false) {
+        dsm->deps->writer->setMode(MIDDLE);
         dsm->deps->writer->write("AUTOMATIC", "TRANSFER SWITCH");
         delay(2000);
         dsm->deps->writer->write(
@@ -117,33 +140,7 @@ void updateDisplayUnknownStart(FSM *dsm) {
  * 
 */
 void enterDisplayStart(FSM* dsm) {
-
     dsm->deps->writer->setMode(RAW);
-
-    // switch (dsm->deps->sm->getCurrentState().getState())
-    // {
-    // case NORMAL:
-    //     dsm->deps->writer->write(
-    //         "GRID UP {5} V",
-    //         "GENSET DOWN {3} V"
-    //     );
-    //     break;
-    // case NORMAL2:
-    //     dsm->deps->writer->write(
-    //         "GRID UP {3} V",
-    //         "GENSET UP {3} V"
-    //     );
-    //     break;   
-    // case STABILITY:
-    //     dsm->deps->writer->write(
-    //         "GRID WENT DOWN - STARTING GENSET IF NO POWER RESTORE",
-    //         "STABILITY {1}"
-    //     );
-    
-    // default:
-    //     break;
-    // }
-    
 }
 
 void updateDisplayStart(FSM* dsm) {
@@ -227,15 +224,15 @@ void exitDisplayStart(FSM* dsm) {}
 
 
 /**
- * SETTINGSSTART -STATE
+ * SettingsStart -STATE
  * 
 */
 void enterSettingsStart(FSM* dsm) {
 
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
-        ">>> SETTINGS <<<",
-        "Press #- to cycle settings or *- to quit"
+        ">>SETTINGS<< 0/4",
+        "Press #- to cycle settings"
     );
 
 }
@@ -245,7 +242,7 @@ void updateSettingsStart(FSM* dsm) {
     char key = DISPLAY_GET_KEY;
 
     if (key == '#') {
-        dsm->transitionTo(DisplayStart);
+        dsm->transitionTo(SettingsManualDrive);
     }
 
     if (key == '*') {
@@ -258,6 +255,34 @@ void exitSettingsStart(FSM* dsm) {}
 
 
 /**
+ * MANUALDRIVE -STATE
+ * 
+*/
+void enterManualDrive(FSM* dsm) {
+
+    dsm->deps->writer->clear();
+    dsm->deps->writer->setMode(MIDDLE);
+    dsm->deps->writer->write(
+        "MANUAL DRIVE 1/4",
+        "Press to manually use: 1=GRID or 2=GENERATOR"
+    );
+
+}
+
+void updateManualDrive(FSM* dsm) {
+
+    char key = DISPLAY_GET_KEY;
+
+    if (key == '#') {
+        dsm->transitionTo(SettingsStabilityTime);
+    }
+
+}
+
+void exitManualDrive(FSM* dsm) {}
+
+
+/**
  * SETTINGSSTABILITYTIME -STATE
  * 
 */
@@ -265,8 +290,8 @@ void enterSettingsStabilityTime(FSM* dsm) {
 
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
-        ">>> SETTINGS <<<",
-        "Press #- to navigate"
+        "STABILITY TI 2/4",
+        "Change current value \"{3}\" by pressing * or press # to continue"
     );
 
 }
@@ -274,14 +299,165 @@ void enterSettingsStabilityTime(FSM* dsm) {
 void updateSettingsStabilityTime(FSM* dsm) {
 
     char key = DISPLAY_GET_KEY;
+    String key_buffer = "";
+
+    dsm->deps->writer->variable(
+        SECOND,
+        (String)dsm->deps->timer->get_remaining_time(STABILITY_TIME)
+    );
 
     if (key == '#') {
-        dsm->transitionTo(DisplayStart);
+        dsm->transitionTo(SettingsSwitchingDelay);
+    }
+
+    if (key == '*') {
+        dsm->transitionTo(SettingsInput);
     }
 
 }
 
 void exitSettingsStabilityTime(FSM* dsm) {}
 
+/**
+ * SWITCHINGDELAY -STATE
+ * 
+*/
+void enterSwitchingDelay(FSM* dsm) {
+
+    dsm->deps->writer->clear();
+    dsm->deps->writer->write(
+        "SWITCH DELAY 3/4",
+        "Press #- to navigate"
+    );
+
+}
+
+void updateSwitchingDelay(FSM* dsm) {
+
+    char key = DISPLAY_GET_KEY;
+
+    if (key == '#') {
+        dsm->transitionTo(SettingsWarmUpTime);
+    }
+
+    if (key == '*') {
+        dsm->transitionTo(SettingsInput);
+    }
+
+}
+
+void exitSwitchingDelay(FSM* dsm) {}
+
+
+/**
+ * WARMUPTIME -STATE
+ * 
+*/
+void enterWarmUpTime(FSM* dsm) {
+
+    dsm->deps->writer->clear();
+    dsm->deps->writer->write(
+        "WARM UP TIME 4/4",
+        "Press #- to navigate"
+    );
+
+}
+
+void updateWarmUpTime(FSM* dsm) {
+
+    char key = DISPLAY_GET_KEY;
+
+    if (key == '#') {
+        // ATS FSM should show for DisplayState that there are state
+        // state change pending and DisplayState would redraw template
+        // again
+        dsm->deps->sm->forceTemplateReDraw();
+        
+        dsm->transitionTo(DisplayUnknownStart);
+    }
+
+    if (key == '*') {
+        dsm->transitionTo(SettingsInput);
+    }
+
+}
+
+void exitWarmUpTime(FSM* dsm) {
+    dsm->deps->writer->clear();
+    dsm->deps->writer->setMode(RAW);
+}
+
+
+/**
+ * SETTINGSINPUT -STATE
+ * 
+*/
+void enterSettingsInput(FSM* dsm) {
+
+    dsm->deps->settings->clear_num_buffer();
+
+    switch (dsm->getPreviousState()->getState()) {
+        case SETTINGSMANUALDRIVE:
+            dsm->deps->writer->write(
+                "Type new value for UNIMPLEMENTED",
+                "yet"
+            );
+            break;
+        case SETTINGSSTABILITYTIME:
+            dsm->deps->writer->write(
+                "Type new value for stability time and press # to save or press * to cancel without saving",
+                "{3}"
+            );
+            break;
+        case SETTINGSSWITCHINGDELAY:
+            break;
+        case SETTINGSWARMUPTIME:
+            break;
+        default:
+            Serial.println("deautl");
+            dsm->transitionTo(DisplayStart);
+            break;
+        
+    }
+
+}
+
+void updateSettingsInput(FSM* dsm) {
+
+    char key = DISPLAY_GET_KEY;
+    String key_buffer = dsm->deps->settings->get_num_buffer_string();
+
+    dsm->deps->writer->variable(
+        SECOND,
+        key_buffer
+    );
+
+    if (key_is_number(key) == true) {
+        int number = key - '0';
+        dsm->deps->settings->add_num_buffer(number);
+    }
+
+    if (key == '#') {
+        // TODO CRIT
+        // dsm->deps->settings->commit_num_buffer(
+        //     dsm->getPreviousState()->getState(),
+        //     dsm->deps->settings->get_num_buffer()->buffer
+        // );
+    }
+
+    if (key == '*') {
+        // Cancel pressed, go back wherever you came from
+        // by using getter of previous state
+        dsm->transitionTo(
+            *dsm->getPreviousState()
+        );
+    }
+
+}
+
+void exitSettingsInput(FSM* dsm) {
+    dsm->deps->writer->clear();
+    dsm->deps->writer->setMode(RAW);
+}
 
 #endif // UNIT_TEST

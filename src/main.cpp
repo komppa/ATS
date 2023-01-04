@@ -37,6 +37,10 @@ Writer writer = Writer(&lcd);
 
 Hardware hardware;
 Timer timer(&hardware);
+// TODO CRIT inject hardware
+// Settings settings(&hardware);
+Settings settings;
+
 
 Deps ATSFSMDeps = {
     .hardware = &hardware,
@@ -53,7 +57,8 @@ Deps displayFSMDeps = {
     .timer = &timer,
     .keypad = &keypad,
     .writer = &writer,
-    .sm = &sm
+    .sm = &sm,
+    .settings = &settings
 };
 
 extern State DisplayUnknownStart;
