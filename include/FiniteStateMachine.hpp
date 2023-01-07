@@ -40,8 +40,9 @@
 // Include for deps if building for atmega2560
 #include <Keypad.h>
 #include "writer.h"
-#include "settings.h"
 #endif // UNIT_TEST
+#include "settings.h"
+
 
 using namespace std;
 
@@ -67,34 +68,6 @@ struct Deps {
 	#endif
 };
 
-enum States {
-
-	// ATS FSM states
-	UNKNOWNSTART,
-	NORMAL,
-	NORMAL2,
-	STABILITY,
-	WAITGEN,
-	WARMUP,
-	SWITCHDELAYTOGEN,
-	SWITCHTOGEN,
-	SWITCHDELAYTOGRID,
-	DETACHGEN,
-
-	// Display FSM states
-	DISPLAYUNKNOWNSTART,
-	DISPLAYSTART,
-	SETTINGSSTART,
-	SETTINGSMANUALDRIVE,
-	SETTINGSSTABILITYTIME,
-	SETTINGSSWITCHINGDELAY,
-	SETTINGSWARMUPTIME,
-	SETTINGSINPUT
-
-	// TODO Writer states
-	// ....
-
-};
 
 //define the functionality of the states
 class State {

@@ -438,11 +438,11 @@ void updateSettingsInput(FSM* dsm) {
     }
 
     if (key == '#') {
-        // TODO CRIT
-        // dsm->deps->settings->commit_num_buffer(
-        //     dsm->getPreviousState()->getState(),
-        //     dsm->deps->settings->get_num_buffer()->buffer
-        // );
+        dsm->deps->settings->commit_setting(
+            dsm->deps->hardware,
+            dsm->getPreviousState()->getState(),
+            key_buffer
+        );
     }
 
     if (key == '*') {

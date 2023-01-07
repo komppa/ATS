@@ -7,6 +7,7 @@
 #else
 #include <string>
 #endif  // UNIT_TEST
+#include "hardware.h"
 
 
 #define SETTING_MIN_VOLTAGE_THRESHOLD   50
@@ -19,6 +20,35 @@
 #define ICON_GENERATOR                  1
 #define ICON_LOAD                       2
 
+ 
+enum States {
+
+	// ATS FSM states
+	UNKNOWNSTART,
+	NORMAL,
+	NORMAL2,
+	STABILITY,
+	WAITGEN,
+	WARMUP,
+	SWITCHDELAYTOGEN,
+	SWITCHTOGEN,
+	SWITCHDELAYTOGRID,
+	DETACHGEN,
+
+	// Display FSM states
+	DISPLAYUNKNOWNSTART,
+	DISPLAYSTART,
+	SETTINGSSTART,
+	SETTINGSMANUALDRIVE,
+	SETTINGSSTABILITYTIME,
+	SETTINGSSWITCHINGDELAY,
+	SETTINGSWARMUPTIME,
+	SETTINGSINPUT
+
+	// TODO Writer states
+	// ....
+
+};
 
 struct numBuffer {
     int length;
@@ -36,11 +66,12 @@ class Settings {
         void add_num_buffer(int num);
         numBuffer* get_num_buffer();
         #ifndef UNIT_TEST
+        void commit_setting(Hardware *hardware, States state, String buffer);
         String get_num_buffer_string();
         #else
+        void commit_setting(States state, std::string buffer);
         std::string get_num_buffer_string();
         #endif  // UNIT_TEST
-        // void commit_num_buffer(States state, int* num_buffer);
 };
 
 

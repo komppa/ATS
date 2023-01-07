@@ -5,7 +5,7 @@
 
 #ifndef UNIT_TEST
 #include <Arduino.h>
-
+#include "settings.h"
 
 
 #define DISPLAY_GET_KEY dsm->deps->keypad->getKey()

@@ -27,6 +27,27 @@ numBuffer* Settings::get_num_buffer() {
 }
 
 #ifndef UNIT_TEST
+void Settings::commit_setting(Hardware *hardware, States state, String buffer)
+#else
+void commit_setting(States state, std::string buffer)
+#endif
+{
+    switch (state) {
+        case SETTINGSSTABILITYTIME:
+            // TODO CRIT change hardware to timer, and eeprom to timer
+            break;
+        case SETTINGSSWITCHINGDELAY:
+
+            break;
+        case SETTINGSWARMUPTIME:
+
+            break;
+        default:
+            break;
+    }
+}
+
+#ifndef UNIT_TEST
 String Settings::get_num_buffer_string() {
 
     String key_buffer = "";
