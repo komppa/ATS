@@ -30,7 +30,7 @@
 #include "FiniteStateMachine.hpp"
 
 #ifdef UNIT_TEST
-State::State( string stateName, States estate, void (*updateFunction)(FiniteStateMachine*) )
+State::State( std::string stateName, States estate, void (*updateFunction)(FiniteStateMachine*) )
 #else
 State::State( String stateName, States estate, void (*updateFunction)(FiniteStateMachine*) )
 #endif
@@ -42,7 +42,7 @@ State::State( String stateName, States estate, void (*updateFunction)(FiniteStat
 }
 
 #ifdef UNIT_TEST
-State::State( string stateName, States estate, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) )
+State::State( std::string stateName, States estate, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) )
 #else
 State::State( String stateName, States estate, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) )
 #endif
@@ -80,7 +80,7 @@ States State::getState() {
 }
 
 #ifdef UNIT_TEST
-string State::getStateName()
+std::string State::getStateName()
 #else
 String State::getStateName()
 #endif

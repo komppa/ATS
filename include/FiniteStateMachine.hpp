@@ -32,6 +32,7 @@
 #ifndef FINITESTATEMACHINE_H
 #define FINITESTATEMACHINE_H
 
+#include "estates.h"
 #include "hardware.h"
 #include "timers.hpp"
 #ifdef UNIT_TEST
@@ -41,10 +42,7 @@
 #include <Keypad.h>
 #include "writer.h"
 #endif // UNIT_TEST
-#include "settings.h"
 
-
-using namespace std;
 
 // #include <Arduino.h> // #include <WProgram.h>
 
@@ -54,8 +52,12 @@ using namespace std;
 
 #define FSM FiniteStateMachine
 
+// TODO CRIT remove these forward declarations
 class State;
 class FiniteStateMachine;
+class Writer;
+class Settings;
+
 
 struct Deps {
     Hardware *hardware;
@@ -73,8 +75,8 @@ struct Deps {
 class State {
 	public:
 		#ifdef UNIT_TEST
-		State( string stateName, States estate, void (*updateFunction)(FiniteStateMachine*));
-		State( string stateName, States estate, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) );
+		State( std::string stateName, States estate, void (*updateFunction)(FiniteStateMachine*));
+		State( std::string stateName, States estate, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) );
 		#else
 		State( String stateName, States estate, void (*updateFunction)(FiniteStateMachine*));
 		State( String stateName, States estate, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) );
@@ -87,14 +89,14 @@ class State {
 		States getState();
 
 		#ifdef UNIT_TEST
-		string getStateName();
+		std::string getStateName();
 		#else
 		String getStateName();
 		#endif
 	private:
 		States estate;
 		#ifdef UNIT_TEST
-		string stateName;
+		std::string stateName;
 		#else
 		String stateName;
 		#endif

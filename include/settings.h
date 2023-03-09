@@ -1,14 +1,13 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+#include "estates.h"
 #include <stdlib.h>
 #ifndef UNIT_TEST
 #include <Arduino.h>
 #else
 #include <string>
 #endif  // UNIT_TEST
-#include "hardware.h"
-
 
 #define SETTING_MIN_VOLTAGE_THRESHOLD   50
 #define SW_VERSION                      0.10
@@ -21,35 +20,6 @@
 #define ICON_LOAD                       2
 
  
-enum States {
-
-	// ATS FSM states
-	UNKNOWNSTART,
-	NORMAL,
-	NORMAL2,
-	STABILITY,
-	WAITGEN,
-	WARMUP,
-	SWITCHDELAYTOGEN,
-	SWITCHTOGEN,
-	SWITCHDELAYTOGRID,
-	DETACHGEN,
-
-	// Display FSM states
-	DISPLAYUNKNOWNSTART,
-	DISPLAYSTART,
-	SETTINGSSTART,
-	SETTINGSMANUALDRIVE,
-	SETTINGSSTABILITYTIME,
-	SETTINGSSWITCHINGDELAY,
-	SETTINGSWARMUPTIME,
-	SETTINGSINPUT
-
-	// TODO Writer states
-	// ....
-
-};
-
 struct numBuffer {
     int length;
     int* buffer;
@@ -66,7 +36,7 @@ class Settings {
         void add_num_buffer(int num);
         numBuffer* get_num_buffer();
         #ifndef UNIT_TEST
-        void commit_setting(Hardware *hardware, States state, String buffer);
+        void commit_setting(States state, String buffer);
         String get_num_buffer_string();
         #else
         void commit_setting(States state, std::string buffer);

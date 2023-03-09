@@ -2,7 +2,6 @@
 #define WRITER_H
 
 #ifndef UNIT_TEST
-#include <Arduino.h>
 #include <LiquidCrystal.h>
 #include "settings.h"
 

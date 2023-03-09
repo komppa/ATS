@@ -439,7 +439,8 @@ void updateSettingsInput(FSM* dsm) {
 
     if (key == '#') {
         dsm->deps->settings->commit_setting(
-            dsm->deps->hardware,
+            // TODO CRIT
+            // dsm->deps->hardware,
             dsm->getPreviousState()->getState(),
             key_buffer
         );

@@ -33,7 +33,7 @@ pio test -e native
 
 Since platformio.ini includes two environmets (native & megaatmega2560 for Arduino Mega) you need to specify for which target you want to build project. To build for ATmega2560:
 ```bash
-pio run -r megaatmega2560
+pio run -e megaatmega2560
 ```
 
 ## Sketch about the idea

@@ -27,7 +27,9 @@ numBuffer* Settings::get_num_buffer() {
 }
 
 #ifndef UNIT_TEST
-void Settings::commit_setting(Hardware *hardware, States state, String buffer)
+// TODO CRIT does it need Hardware *hardware as a first parameter?
+// void Settings::commit_setting(States state, String buffer)
+void Settings::commit_setting(States state, String buffer)
 #else
 void commit_setting(States state, std::string buffer)
 #endif
@@ -61,5 +63,3 @@ String Settings::get_num_buffer_string() {
 #else
 std::string Settings::get_num_buffer_string() { return ""; }
 #endif  //UNIT_TEST
-
-// void Settings::commit_num_buffer(States state, int* num_buffer) {}s

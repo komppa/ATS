@@ -11,7 +11,6 @@
 #include "writer.h"
 #include "hardware.h"
 #include <stdio.h>
-#include "states.h"
 #include "FiniteStateMachine.hpp"   // for Deps
 #include "display.h"
 #include "settings.h"
@@ -37,10 +36,6 @@ Writer writer = Writer(&lcd);
 
 Hardware hardware;
 Timer timer(&hardware);
-// TODO CRIT inject hardware
-// Settings settings(&hardware);
-Settings settings;
-
 
 Deps ATSFSMDeps = {
     .hardware = &hardware,
@@ -57,8 +52,9 @@ Deps displayFSMDeps = {
     .timer = &timer,
     .keypad = &keypad,
     .writer = &writer,
-    .sm = &sm,
-    .settings = &settings
+    .sm = &sm
+    // TODO CRIT add settings?
+    // .settings = &settings; & Settings settings; & #include "settings.h" 
 };
 
 extern State DisplayUnknownStart;
