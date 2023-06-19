@@ -87,10 +87,6 @@ void setup() {
     pinMode(PIN_VOLTAGE_GRID, INPUT_PULLUP);
     pinMode(PIN_VOLTAGE_GENERATOR, INPUT_PULLUP);
 
-
-    timer.set_timer(STABILITY_TIME, 2);
-    timer.set_timer(WARM_UP_TIME, 2);
-
 }
 
 
