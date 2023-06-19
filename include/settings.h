@@ -29,12 +29,15 @@ struct numBuffer {
 class Settings {
     private:
         numBuffer num_buffer;
+        bool override_active;
     public:
         Settings();
         // ~Settings();
         void clear_num_buffer();
         void add_num_buffer(int num);
         numBuffer* get_num_buffer();
+        void set_override_active(bool);
+        bool get_override_active();
         #ifndef UNIT_TEST
         void commit_setting(States state, String buffer);
         String get_num_buffer_string();

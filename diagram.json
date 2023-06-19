@@ -60,7 +60,8 @@
     [ "led1:C", "uno:GND.2", "black", [ "v0" ] ],
     [ "led1:A", "uno:22", "yellow", [ "v0" ] ],
     [ "led2:A", "uno:23", "green", [ "v0" ] ],
-    [ "uno:GND.5", "uno:53", "yellow", [ "v0" ] ]
+    [ "uno:GND.5", "uno:53", "yellow", [ "v0" ] ],
+    [ "uno:6", "uno:RESET", "green", [ "h0.6", "v87.35", "h-58.6" ] ]
   ],
   "dependencies": {}
 }

@@ -26,6 +26,18 @@ numBuffer* Settings::get_num_buffer() {
     return &this->num_buffer;
 }
 
+// When setting override as active grid & genset
+// inputs are ignored when selecting for instance
+// the input of the load. Can be triggered at least
+// from settings (#-key) when selecting manual ATS input.
+void Settings::set_override_active(bool active) {
+    this->override_active = active;
+}
+
+bool Settings::get_override_active() {
+    return this->override_active;
+}
+
 #ifndef UNIT_TEST
 // TODO CRIT does it need Hardware *hardware as a first parameter?
 // void Settings::commit_setting(States state, String buffer)
