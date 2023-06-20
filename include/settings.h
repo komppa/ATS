@@ -33,6 +33,8 @@ class Settings {
     public:
         Settings();
         // ~Settings();
+        void init_num_buffer();
+        void free_num_buffer();
         void clear_num_buffer();
         void add_num_buffer(int num);
         numBuffer* get_num_buffer();

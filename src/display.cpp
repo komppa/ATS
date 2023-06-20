@@ -6,14 +6,14 @@
 #ifndef UNIT_TEST
 
 
-State DisplayUnknownStart = State("DisplayUnknownStart", DISPLAYUNKNOWNSTART, &updateDisplayUnknownStart);
-State DisplayStart = State("DisplayStart", DISPLAYSTART, &enterDisplayStart, &updateDisplayStart, &exitDisplayStart);
-State SettingsStart = State("SettingsStart", SETTINGSSTART, &enterSettingsStart, &updateSettingsStart, &exitSettingsStart);
-State SettingsManualDrive = State("SettingsManualDrive", SETTINGSMANUALDRIVE, &enterManualDrive, &updateManualDrive, &exitManualDrive);
-State SettingsStabilityTime = State("SettingsStabilityTime", SETTINGSSTABILITYTIME, &enterSettingsStabilityTime, &updateSettingsStabilityTime, &exitSettingsStabilityTime);
-State SettingsSwitchingDelay = State("SettingsSwitchingDelay", SETTINGSSWITCHINGDELAY, &enterSwitchingDelay, &updateSwitchingDelay, &exitSwitchingDelay);
-State SettingsWarmUpTime = State("SettingsWarmUpTime", SETTINGSWARMUPTIME, &enterWarmUpTime, &updateWarmUpTime, &exitWarmUpTime);
-State SettingsInput = State("SettingsInput", SETTINGSINPUT, &enterSettingsInput, &updateSettingsInput, &exitSettingsInput);
+State DisplayUnknownStart = State(DISPLAYUNKNOWNSTART, &updateDisplayUnknownStart);
+State DisplayStart = State(DISPLAYSTART, &enterDisplayStart, &updateDisplayStart, &exitDisplayStart);
+State SettingsStart = State(SETTINGSSTART, &enterSettingsStart, &updateSettingsStart, &exitSettingsStart);
+State SettingsManualDrive = State(SETTINGSMANUALDRIVE, &enterManualDrive, &updateManualDrive, &exitManualDrive);
+State SettingsStabilityTime = State(SETTINGSSTABILITYTIME, &enterSettingsStabilityTime, &updateSettingsStabilityTime, &exitSettingsStabilityTime);
+State SettingsSwitchingDelay = State(SETTINGSSWITCHINGDELAY, &enterSwitchingDelay, &updateSwitchingDelay, &exitSwitchingDelay);
+State SettingsWarmUpTime = State(SETTINGSWARMUPTIME, &enterWarmUpTime, &updateWarmUpTime, &exitWarmUpTime);
+State SettingsInput = State(SETTINGSINPUT, &enterSettingsInput, &updateSettingsInput, &exitSettingsInput);
 
 
 void drawTemplate(Writer *writer, Hardware *hardware, State *state) {
@@ -86,7 +86,7 @@ void drawTemplate(Writer *writer, Hardware *hardware, State *state) {
             );
             break;
         default:
-            writer->write((String)"STATE \"" + state->getStateName() + "\" {5}", "IS UNKNOWN, BUG? {5}");
+            // writer->write((String)"STATE \"" + state->getState() + "\" {5}", "IS UNKNOWN, BUG? {5}");
             break;
     }
 }
@@ -246,7 +246,22 @@ void updateSettingsStart(FSM* dsm) {
     }
 
     if (key == '*') {
-        dsm->transitionTo(DisplayStart);
+        
+        // TODO since this does not work and we fix it by going to
+        // do a full reset, we should just do display SM reset here
+        // dsm->deps->sm->immediateTransitionTo(
+        //     *dsm->deps->sm->getPreviousState()
+        // );
+
+        // We should save new settings but since this is just
+        // "enter menu" to settings, there is no need to save
+
+        // After saving, reset board
+        // TODO CRIT not tested on real hardware! Do not work 
+
+        // NOTE this needs wire from PIN 6 to RST!
+        digitalWrite(6, LOW);
+
     }
 
 }
@@ -264,7 +279,7 @@ void enterManualDrive(FSM* dsm) {
     dsm->deps->writer->setMode(MIDDLE);
     dsm->deps->writer->write(
         "MANUAL DRIVE 1/4",
-        "Press to manually use: 1=GRID or 2=GENERATOR"
+        "Press #- to navigate further or press * to select manual input source"
     );
 
 }
@@ -275,6 +290,11 @@ void updateManualDrive(FSM* dsm) {
 
     if (key == '#') {
         dsm->transitionTo(SettingsStabilityTime);
+    }
+
+    if (key == '*') {
+        // We are going to input manual input source
+        dsm->transitionTo(SettingsInput);
     }
 
 }
@@ -291,7 +311,8 @@ void enterSettingsStabilityTime(FSM* dsm) {
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
         "STABILITY TI 2/4",
-        "Change current value \"{3}\" by pressing * or press # to continue"
+        // "Change current value \"{3}\" by pressing * or press # to continue"
+        "Press #- to navigate further becuase this is not implemented yet"
     );
 
 }
@@ -327,7 +348,7 @@ void enterSwitchingDelay(FSM* dsm) {
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
         "SWITCH DELAY 3/4",
-        "Press #- to navigate"
+        "Press #- to navigate further becuase this is not implemented yet"
     );
 
 }
@@ -358,7 +379,7 @@ void enterWarmUpTime(FSM* dsm) {
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
         "WARM UP TIME 4/4",
-        "Press #- to navigate"
+        "Press #- to navigate further becuase this is not implemented yet"
     );
 
 }
@@ -394,13 +415,14 @@ void exitWarmUpTime(FSM* dsm) {
 */
 void enterSettingsInput(FSM* dsm) {
 
+    dsm->deps->settings->init_num_buffer();
     dsm->deps->settings->clear_num_buffer();
 
     switch (dsm->getPreviousState()->getState()) {
         case SETTINGSMANUALDRIVE:
             dsm->deps->writer->write(
-                "Type new value for UNIMPLEMENTED",
-                "yet"
+                "Type new value for manual source and press # to save or press * to cancel without saving. 1 = GRID and 2 = GENERATOR",
+                "{1}"
             );
             break;
         case SETTINGSSTABILITYTIME:
@@ -414,7 +436,6 @@ void enterSettingsInput(FSM* dsm) {
         case SETTINGSWARMUPTIME:
             break;
         default:
-            Serial.println("deautl");
             dsm->transitionTo(DisplayStart);
             break;
         
@@ -457,6 +478,8 @@ void updateSettingsInput(FSM* dsm) {
 }
 
 void exitSettingsInput(FSM* dsm) {
+    dsm->deps->settings->free_num_buffer();
+
     dsm->deps->writer->clear();
     dsm->deps->writer->setMode(RAW);
 }

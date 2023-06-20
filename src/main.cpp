@@ -36,6 +36,7 @@ Writer writer = Writer(&lcd);
 
 Hardware hardware;
 Timer timer(&hardware);
+Settings settings;
 
 Deps ATSFSMDeps = {
     .hardware = &hardware,
@@ -52,9 +53,8 @@ Deps displayFSMDeps = {
     .timer = &timer,
     .keypad = &keypad,
     .writer = &writer,
-    .sm = &sm
-    // TODO CRIT add settings?
-    // .settings = &settings; & Settings settings; & #include "settings.h" 
+    .sm = &sm,
+    .settings = &settings
 };
 
 extern State DisplayUnknownStart;
@@ -86,6 +86,9 @@ void setup() {
 
     pinMode(PIN_VOLTAGE_GRID, INPUT_PULLUP);
     pinMode(PIN_VOLTAGE_GENERATOR, INPUT_PULLUP);
+
+    // Wait a little bit for hardware to settle
+    // delay(500);
 
 }
 

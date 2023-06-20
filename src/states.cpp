@@ -5,16 +5,16 @@
 #include "FiniteStateMachine.hpp"
 
 
-State UnknownStart = State("UnknownStart", UNKNOWNSTART, &enterUnknownStart, &updateUnknownStart, &exitUnknownStart);
-State Normal = State("Normal", NORMAL, &enterNormal, &updateNormal, &exitNormal);
-State Stability = State("Stability", STABILITY, &enterStability, &updateStability, &exitStability);
-State WaitGen = State("WaitGen", WAITGEN, &enterWaitGen, &updateWaitGen, &exitWaitGen);
-State WarmUp = State("WarmUp", WARMUP, &enterWarmUp, &updateWarmUp, &exitWarmUp);
-State SwitchDelayToGen = State("SwitchDelayToGen", SWITCHDELAYTOGEN, &enterSwitchDelayToGen, &updateSwitchDelayToGen, &exitSwitchDelayToGen);
-State SwitchToGen = State("SwitchToGen", SWITCHTOGEN, &enterSwitchToGen, &updateSwitchToGen, &exitSwitchToGen);
-State DetachGen = State("DetachGen", DETACHGEN, &enterDetachGen, &updateDetachGen, &exitDetachGen);
-State Normal2 = State("Normal2", NORMAL2, &enterNormal2, &updateNormal2, &exitNormal2);
-State SwitchDelayToGrid = State("SwitchDelayToGrid",SWITCHDELAYTOGRID, &enterSwitchDelayToGrid, &updateSwitchDelayToGrid, &exitSwitchDelayToGrid);
+State UnknownStart = State(UNKNOWNSTART, &enterUnknownStart, &updateUnknownStart, &exitUnknownStart);
+State Normal = State(NORMAL, &enterNormal, &updateNormal, &exitNormal);
+State Stability = State(STABILITY, &enterStability, &updateStability, &exitStability);
+State WaitGen = State(WAITGEN, &enterWaitGen, &updateWaitGen, &exitWaitGen);
+State WarmUp = State(WARMUP, &enterWarmUp, &updateWarmUp, &exitWarmUp);
+State SwitchDelayToGen = State(SWITCHDELAYTOGEN, &enterSwitchDelayToGen, &updateSwitchDelayToGen, &exitSwitchDelayToGen);
+State SwitchToGen = State(SWITCHTOGEN, &enterSwitchToGen, &updateSwitchToGen, &exitSwitchToGen);
+State DetachGen = State(DETACHGEN, &enterDetachGen, &updateDetachGen, &exitDetachGen);
+State Normal2 = State(NORMAL2, &enterNormal2, &updateNormal2, &exitNormal2);
+State SwitchDelayToGrid = State(SWITCHDELAYTOGRID, &enterSwitchDelayToGrid, &updateSwitchDelayToGrid, &exitSwitchDelayToGrid);
 
 
 bool is_grid_up(Hardware *h) {

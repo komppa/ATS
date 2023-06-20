@@ -30,25 +30,23 @@
 #include "FiniteStateMachine.hpp"
 
 #ifdef UNIT_TEST
-State::State( std::string stateName, States estate, void (*updateFunction)(FiniteStateMachine*) )
+State::State( States estate, void (*updateFunction)(FiniteStateMachine*) )
 #else
-State::State( String stateName, States estate, void (*updateFunction)(FiniteStateMachine*) )
+State::State( States estate, void (*updateFunction)(FiniteStateMachine*) )
 #endif
 {
-	this->stateName = stateName;
 	this->userEnter = 0;
 	this->userUpdate = updateFunction;
 	this->userExit = 0;
 }
 
 #ifdef UNIT_TEST
-State::State( std::string stateName, States estate, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) )
+State::State( States estate, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) )
 #else
-State::State( String stateName, States estate, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) )
+State::State( States estate, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) )
 #endif
 {
 	this->estate = estate;
-	this->stateName = stateName;
 	this->userEnter = enterFunction;
 	this->userUpdate = updateFunction;
 	this->userExit = exitFunction;
@@ -79,14 +77,14 @@ States State::getState() {
 	return this->estate;
 }
 
-#ifdef UNIT_TEST
-std::string State::getStateName()
-#else
-String State::getStateName()
-#endif
-{
-	return this->stateName;
-}
+// #ifdef UNIT_TEST
+// std::string State::getStateName()
+// #else
+// String State::getStateName()
+// #endif
+// {
+// 	return this->stateName;
+// }
 //END FINITE STATE
 
 

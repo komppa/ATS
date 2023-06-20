@@ -75,11 +75,11 @@ struct Deps {
 class State {
 	public:
 		#ifdef UNIT_TEST
-		State( std::string stateName, States estate, void (*updateFunction)(FiniteStateMachine*));
-		State( std::string stateName, States estate, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) );
+		State( States estate, void (*updateFunction)(FiniteStateMachine*));
+		State( States estate, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) );
 		#else
-		State( String stateName, States estate, void (*updateFunction)(FiniteStateMachine*));
-		State( String stateName, States estate, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) );
+		State( States estate, void (*updateFunction)(FiniteStateMachine*));
+		State( States estate, void (*enterFunction)(FiniteStateMachine*), void (*updateFunction)(FiniteStateMachine*), void (*exitFunction)(FiniteStateMachine*) );
 		#endif
 
 		void enter(FiniteStateMachine *fsm);
@@ -88,18 +88,18 @@ class State {
 
 		States getState();
 
-		#ifdef UNIT_TEST
-		std::string getStateName();
-		#else
-		String getStateName();
-		#endif
+		// #ifdef UNIT_TEST
+		// std::string getStateName();
+		// #else
+		// String getStateName();
+		// #endif
 	private:
 		States estate;
-		#ifdef UNIT_TEST
-		std::string stateName;
-		#else
-		String stateName;
-		#endif
+		// #ifdef UNIT_TEST
+		// std::string stateName;
+		// #else
+		// String stateName;
+		// #endif
 		void (*userEnter)(FiniteStateMachine*);
 		void (*userUpdate)(FiniteStateMachine*);
 		void (*userExit)(FiniteStateMachine*);

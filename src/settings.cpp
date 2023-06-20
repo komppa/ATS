@@ -3,12 +3,23 @@
 
 Settings::Settings() {
     this->num_buffer.length = 0;
-    this->num_buffer.buffer = (int*)malloc(sizeof(int) * NUM_BUFFER_MAX_LENGTH);
+    this->num_buffer.buffer = NULL;
 }
 
 // Settings::~Settings() {
 //     free(this->num_buffer.buffer);
 // }
+
+void Settings::init_num_buffer() {
+    this->num_buffer.buffer = (int*)malloc(sizeof(int) * NUM_BUFFER_MAX_LENGTH);
+    this->num_buffer.length = 0;
+
+}
+
+void Settings::free_num_buffer() {
+    free(this->num_buffer.buffer);
+    this->num_buffer.length = 0;
+}
 
 void Settings::clear_num_buffer() {
     this->num_buffer.length = 0;
