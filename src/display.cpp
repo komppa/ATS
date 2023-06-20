@@ -422,7 +422,7 @@ void enterSettingsInput(FSM* dsm) {
         case SETTINGSMANUALDRIVE:
             dsm->deps->writer->write(
                 "Type new value for manual source and press # to save or press * to cancel without saving. 1 = GRID and 2 = GENERATOR",
-                "{1}"
+                "{3}"
             );
             break;
         case SETTINGSSTABILITYTIME:
@@ -448,28 +448,59 @@ void updateSettingsInput(FSM* dsm) {
     char key = DISPLAY_GET_KEY;
     String key_buffer = dsm->deps->settings->get_num_buffer_string();
 
+    // Update entered variable that is saved on num buffer to screen
     dsm->deps->writer->variable(
         SECOND,
-        key_buffer
+        // TODO ish? String "GRID" is longer than its template definition on
+        // enterSettingsInput. This works still just fine...
+        dsm->deps->settings->get_num_buffer()->buffer[0] == 1 ? "GRID" : "GEN "
     );
 
     if (key_is_number(key) == true) {
+
+        // Stupid casting to get integer from the keypad
         int number = key - '0';
-        dsm->deps->settings->add_num_buffer(number);
+
+        switch (dsm->getPreviousState()->getState()) {
+
+            case SETTINGSMANUALDRIVE:
+                // Since we are getting input for manual drive and it is
+                // represented with one digit, we allow one digit to be inputted
+                // at a time.
+                //
+                if (dsm->deps->settings->get_num_buffer()->length != 0) {
+                    // Since there was already a digit(s), discard them and save
+                    // the new one to be possible input. (User can toggle between
+                    // 1 and 2 but when the user press # - it'll be saved)
+                    dsm->deps->settings->clear_num_buffer();
+                }
+                dsm->deps->settings->add_num_buffer(number);
+
+                break;
+
+            default:
+                break;
+        }
     }
 
     if (key == '#') {
+        // When save button is pressed on input state:
+        // 1) save new value if entered
+        // 2) move back to showing setting 1/4 where we came from
         dsm->deps->settings->commit_setting(
             // TODO CRIT
             // dsm->deps->hardware,
             dsm->getPreviousState()->getState(),
             key_buffer
         );
+        dsm->transitionTo(
+            *dsm->getPreviousState()
+        );
     }
 
     if (key == '*') {
         // Cancel pressed, go back wherever you came from
-        // by using getter of previous state
+        // by using getter of previous state.
         dsm->transitionTo(
             *dsm->getPreviousState()
         );
