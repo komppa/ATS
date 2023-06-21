@@ -84,8 +84,8 @@ int Hardware::initEEPROM() {
 
             Serial.println("Initializing EEPROM");
 
-            // By default, source is grid
-            EEPROM.write(EEPROM_ADDRESS_SOURCE, 1);
+            // By default, source is AUTO (3), not grid (1) or generator (2)
+            EEPROM.write(EEPROM_ADDRESS_SOURCE, 3);
             
             // Mark EEPROM as initialized
             EEPROM.write(EEPROM_INIT_ADDRESS, EEPROM_INITIALIZED);

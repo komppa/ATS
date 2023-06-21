@@ -4,11 +4,24 @@
 Settings::Settings() {
     this->num_buffer.length = 0;
     this->num_buffer.buffer = NULL;
+    this->override_source = AUTOMATIC;
 }
 
 // Settings::~Settings() {
 //     free(this->num_buffer.buffer);
 // }
+
+void Settings::load(Hardware* hardware) {
+    
+    // Get source from EEPROM and then save it to settings
+    int source = hardware->eepromRead(EEPROM_ADDRESS_SOURCE);
+    if (source < 0 || source > 3) {
+        // TODO found unknown source, what to do?
+        source = AUTOMATIC;
+    }
+    this->override_source = (enum source)source;
+
+}
 
 void Settings::init_num_buffer() {
     this->num_buffer.buffer = (int*)malloc(sizeof(int) * NUM_BUFFER_MAX_LENGTH);
@@ -41,12 +54,22 @@ numBuffer* Settings::get_num_buffer() {
 // inputs are ignored when selecting for instance
 // the input of the load. Can be triggered at least
 // from settings (#-key) when selecting manual ATS input.
-void Settings::set_override_active(bool active) {
-    this->override_active = active;
+void Settings::set_override_source(source source) {
+    this->override_source = source;
 }
 
-bool Settings::get_override_active() {
-    return this->override_active;
+overrideSource Settings::get_override() {
+    if (this->override_source == GRID || this->override_source == GENERATOR) {
+        return {
+            .active = true,
+            .s = this->override_source
+        };
+    } else {
+        return {
+            .active = false,
+            .s = AUTOMATIC
+        };
+    }
 }
 
 // TODO CRIT does it need Hardware *hardware as a first parameter?

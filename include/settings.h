@@ -26,21 +26,33 @@ struct numBuffer {
     int* buffer;
 };
 
+enum source {
+    GRID = 1,
+    GENERATOR = 2,
+    AUTOMATIC = 3
+};
+
+struct overrideSource {
+    bool active;
+    source s;
+};
+
 
 class Settings {
     private:
         numBuffer num_buffer;
-        bool override_active;
+        source override_source;
     public:
         Settings();
+        void load(Hardware*);
         // ~Settings();
         void init_num_buffer();
         void free_num_buffer();
         void clear_num_buffer();
         void add_num_buffer(int num);
         numBuffer* get_num_buffer();
-        void set_override_active(bool);
-        bool get_override_active();
+        void set_override_source(source);
+        overrideSource get_override();
         void commit_setting(Hardware* hardware, States state, int value);
         #ifndef UNIT_TEST
         String get_num_buffer_string();

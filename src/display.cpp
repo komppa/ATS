@@ -429,6 +429,7 @@ void enterSettingsInput(FSM* dsm) {
         case SETTINGSMANUALDRIVE:
             // TODO CRIT there should be third option for manual input
             // source, 3 = AUTO
+            // NOTE no need to implement if manual drive is "blocking" action
             dsm->deps->writer->write(
                 "Type new value for manual source and press # to save or press * to cancel without saving. 1 = GRID and 2 = GENERATOR",
                 "{3}"
@@ -458,11 +459,28 @@ void updateSettingsInput(FSM* dsm) {
     String key_buffer = dsm->deps->settings->get_num_buffer_string();
 
     // Update entered variable that is saved on num buffer to screen
+    String source_name = "";
+
+    switch (dsm->deps->settings->get_num_buffer()->buffer[0]) {
+        case 1:
+            source_name = "GRID";
+            break;
+        case 2:
+            source_name = "GENERATOR";
+            break;
+        case 3:
+            source_name = "AUTO";
+            break;
+        default:
+            source_name = "UNKNOWN";
+            break;
+    }
+
     dsm->deps->writer->variable(
         SECOND,
         // TODO ish? String "GRID" is longer than its template definition on
         // enterSettingsInput. This works still just fine...
-        dsm->deps->settings->get_num_buffer()->buffer[0] == 1 ? "GRID" : "GEN "
+        source_name
     );
 
     if (key_is_number(key) == true) {
@@ -493,6 +511,8 @@ void updateSettingsInput(FSM* dsm) {
     }
 
     if (key == '#') {
+
+        source s = (enum source)dsm->deps->settings->get_num_buffer()->buffer[0];
         // When save button is pressed on input state:
         // 1) save new value if entered
         // 2) move back to showing setting 1/4 where we came from
@@ -504,12 +524,29 @@ void updateSettingsInput(FSM* dsm) {
             // to distinguish between different settings.
             dsm->getPreviousState()->getState(),
             // Raw first digit integer
-            dsm->deps->settings->get_num_buffer()->buffer[0]
+            (int)s
         );
 
         // By telling that override is active, we are ignoring state machine
-        // and just using override source.
-        dsm->deps->settings->set_override_active(true);
+        // and just using override source. If the override source is set to
+        // AUTO (3), then we are not raising override flag to interrupt the
+        // ATS state machine.
+        // if ()
+        dsm->deps->settings->set_override_source(
+            s
+        );
+
+        // TODO this is not optimal place to switch contactors
+        // TODO CRIT and therefore this has been disabled for now
+        // if (s == GRID) {
+        //     dsm->deps->hardware->setDigital(PIN_CONTACTOR_GENERATOR, false);
+        //     dsm->deps->hardware->wait(100);
+        //     dsm->deps->hardware->setDigital(PIN_CONTACTOR_GRID, true);
+        // } else if (s == GENERATOR) {
+        //     dsm->deps->hardware->setDigital(PIN_CONTACTOR_GRID, false);
+        //     dsm->deps->hardware->wait(100);
+        //     dsm->deps->hardware->setDigital(PIN_CONTACTOR_GENERATOR, true);
+        // }
 
         dsm->transitionTo(
             *dsm->getPreviousState()

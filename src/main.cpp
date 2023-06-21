@@ -90,26 +90,50 @@ void setup() {
     // Init EEPROM
     hardware.initEEPROM();
 
+    // Get values from EEPROM at startup
+    settings.load(&hardware);
+
     // Wait a little bit for hardware to settle
-    // delay(500);
+    delay(500);
 
 }
 
 
 void loop() {
 
-    // Limitter
+    // Limiter
     delay(100);
 
-    // Updates
+    if (settings.get_override().active) {
+        // Display the override message on the LCD
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("MANUAL-SRC:GRID");
+        lcd.setCursor(0, 1);
+        lcd.print("EXIT MAN:PRS KEY");
+        
+        // Wait for key press to deactivate override mode
+        char key = keypad.getKey();
+        if (key) {
+            // Deactivate override mode by saying the source is automatic
+            settings.set_override_source(AUTOMATIC);
+            lcd.clear();
+        }
+        
+        // Return early so the FSM is not updated while in override mode
+        return;
+    }
+
+    // Regular updates
     sm.update();
     timer.update();
     writer.update();
-    // TODO wait few seconds before starting screen refreshing on startup
-    // to ensure that electricity can be flowed from grid as fast as possible.
-    if (millis() > 1000) display.update();
-
+    if (millis() > 1000) {
+        display.update();
+    }
 }
+
+
 
 
 #endif // Do not compile setup and loop if unit testing
