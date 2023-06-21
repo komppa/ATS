@@ -49,15 +49,16 @@ bool Settings::get_override_active() {
     return this->override_active;
 }
 
-#ifndef UNIT_TEST
 // TODO CRIT does it need Hardware *hardware as a first parameter?
-// void Settings::commit_setting(States state, String buffer)
-void Settings::commit_setting(States state, String buffer)
-#else
-void commit_setting(States state, std::string buffer)
-#endif
+void Settings::commit_setting(Hardware *hardware, States state, int value)
 {
     switch (state) {
+        case SETTINGSMANUALDRIVE:
+            hardware->eepromWrite(
+                EEPROM_ADDRESS_SOURCE,
+                value
+            );
+            break;
         case SETTINGSSTABILITYTIME:
             // TODO CRIT change hardware to timer, and eeprom to timer
             break;

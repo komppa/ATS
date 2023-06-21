@@ -7,6 +7,7 @@
 // If building release for Arduino, include it to be used by this class
 #ifndef UNIT_TEST
 #include <Arduino.h>
+#include <EEPROM.h>
 #endif
 
 #ifdef ARDUINO
@@ -55,6 +56,11 @@
 // Simulator runtime check
 #define PIN_IS_SIMULATOR        53
 
+// EEPROM addresses
+static const int EEPROM_INITIALIZED = 42;
+static const int EEPROM_INIT_ADDRESS = 568; // Random address
+#define EEPROM_ADDRESS_SOURCE   0
+
 
 class Hardware {
     private:
@@ -69,6 +75,10 @@ class Hardware {
         // Voltage sensor to be able to mocked
         virtual int getVoltageAC(uint8_t pin);
         virtual bool isSimulator();
+        // TODO mocs for eeprom
+        virtual int initEEPROM();
+        virtual int eepromRead(int address);
+        virtual int eepromWrite(int address, int value);
 };
 
 #ifdef UNIT_TEST

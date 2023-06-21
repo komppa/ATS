@@ -312,7 +312,7 @@ void enterSettingsStabilityTime(FSM* dsm) {
     dsm->deps->writer->write(
         "STABILITY TI 2/4",
         // "Change current value \"{3}\" by pressing * or press # to continue"
-        "Press #- to navigate further becuase this is not implemented yet"
+        "Press #- to navigate further because this is not implemented yet"
     );
 
 }
@@ -348,7 +348,7 @@ void enterSwitchingDelay(FSM* dsm) {
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
         "SWITCH DELAY 3/4",
-        "Press #- to navigate further becuase this is not implemented yet"
+        "Press #- to navigate further because this is not implemented yet"
     );
 
 }
@@ -379,7 +379,7 @@ void enterWarmUpTime(FSM* dsm) {
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
         "WARM UP TIME 4/4",
-        "Press #- to navigate further becuase this is not implemented yet"
+        "Press #- to navigate further because this is not implemented yet"
     );
 
 }
@@ -418,8 +418,17 @@ void enterSettingsInput(FSM* dsm) {
     dsm->deps->settings->init_num_buffer();
     dsm->deps->settings->clear_num_buffer();
 
+    // Get saved source from eeprom
+    dsm->deps->settings->add_num_buffer(
+        dsm->deps->hardware->eepromRead(
+            EEPROM_ADDRESS_SOURCE
+        )
+    );
+
     switch (dsm->getPreviousState()->getState()) {
         case SETTINGSMANUALDRIVE:
+            // TODO CRIT there should be third option for manual input
+            // source, 3 = AUTO
             dsm->deps->writer->write(
                 "Type new value for manual source and press # to save or press * to cancel without saving. 1 = GRID and 2 = GENERATOR",
                 "{3}"
@@ -488,11 +497,20 @@ void updateSettingsInput(FSM* dsm) {
         // 1) save new value if entered
         // 2) move back to showing setting 1/4 where we came from
         dsm->deps->settings->commit_setting(
-            // TODO CRIT
-            // dsm->deps->hardware,
+            // Hardware for accessing EEPROM
+            dsm->deps->hardware,
+            // NOTE: we are not telling that we are on input state but
+            // we are telling that we are on the state where we came from
+            // to distinguish between different settings.
             dsm->getPreviousState()->getState(),
-            key_buffer
+            // Raw first digit integer
+            dsm->deps->settings->get_num_buffer()->buffer[0]
         );
+
+        // By telling that override is active, we are ignoring state machine
+        // and just using override source.
+        dsm->deps->settings->set_override_active(true);
+
         dsm->transitionTo(
             *dsm->getPreviousState()
         );

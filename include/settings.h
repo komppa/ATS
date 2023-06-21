@@ -3,6 +3,7 @@
 
 #include "estates.h"
 #include <stdlib.h>
+#include "hardware.h"
 #ifndef UNIT_TEST
 #include <Arduino.h>
 #else
@@ -40,11 +41,10 @@ class Settings {
         numBuffer* get_num_buffer();
         void set_override_active(bool);
         bool get_override_active();
+        void commit_setting(Hardware* hardware, States state, int value);
         #ifndef UNIT_TEST
-        void commit_setting(States state, String buffer);
         String get_num_buffer_string();
         #else
-        void commit_setting(States state, std::string buffer);
         std::string get_num_buffer_string();
         #endif  // UNIT_TEST
 };

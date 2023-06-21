@@ -77,6 +77,42 @@ bool Hardware::isSimulator() {
 
 }
 
+int Hardware::initEEPROM() {
+    #ifdef ARDUINO
+        // Check if EEPROM has been initialized
+        if (EEPROM.read(EEPROM_INIT_ADDRESS) != EEPROM_INITIALIZED) {
+
+            Serial.println("Initializing EEPROM");
+
+            // By default, source is grid
+            EEPROM.write(EEPROM_ADDRESS_SOURCE, 1);
+            
+            // Mark EEPROM as initialized
+            EEPROM.write(EEPROM_INIT_ADDRESS, EEPROM_INITIALIZED);
+        }
+        return 0;
+    #else
+        return 568;
+    #endif
+}
+
+int Hardware::eepromRead(int address) {
+    #ifdef ARDUINO
+    return EEPROM.read(address);
+    #else
+    return 568;
+    #endif
+}
+
+int Hardware::eepromWrite(int address, int value) {
+    #ifdef ARDUINO
+    EEPROM.write(address, value);
+    return 0;
+    #else
+    return 568;
+    #endif
+}
+
 // TODO digitalRead
 // TODO digitalWrite
 // TODO analogRead

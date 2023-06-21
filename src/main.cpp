@@ -87,6 +87,9 @@ void setup() {
     pinMode(PIN_VOLTAGE_GRID, INPUT_PULLUP);
     pinMode(PIN_VOLTAGE_GENERATOR, INPUT_PULLUP);
 
+    // Init EEPROM
+    hardware.initEEPROM();
+
     // Wait a little bit for hardware to settle
     // delay(500);
 
