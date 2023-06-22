@@ -15,6 +15,32 @@ jobs:
         run: |
           docker build --no-cache -t pioimage .
 
-      - name: Build and publish ram usage
+      - name: Build and publish memory usage
         run: |
-          docker run --entrypoint /entrypointRelease.sh -e "GISTS_TOKEN=${{ secrets.GISTS_TOKEN }}" --rm pioimage
+          docker run --entrypoint /entrypointRelease.sh -e "GISTS_TOKEN=${{ secrets.GISTS_TOKEN }}" -v $PWD/.pio:/home/ci/app/.pio --rm pioimage
+
+      - name: Get the date for release
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y%m%d%H%M%S')"
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.date.outputs.date }}
+          release_name: Release ${{ steps.date.outputs.date }}
+          draft: false
+          prerelease: false
+      
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: .pio/build/megaatmega2560/firmware.hex # Replace this with the correct path to your hex file
+          asset_name: ATS_firmware.hex
+          asset_content_type: application/octet-stream

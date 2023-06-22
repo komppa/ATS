@@ -2,7 +2,7 @@
 
 FROM ubuntu
 
-WORKDIR /home/ci/project
+WORKDIR /home/ci/app
 
 RUN apt update
 
@@ -15,6 +15,6 @@ COPY entrypointRelease.sh /.
 RUN chmod +x /entrypoint.sh
 RUN chmod +x /entrypointRelease.sh
 
-COPY . /home/ci/project/.
+COPY . /home/ci/app/.
 
 ENTRYPOINT ["/entrypoint.sh"]
