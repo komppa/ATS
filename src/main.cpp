@@ -91,7 +91,7 @@ void setup() {
     hardware.initEEPROM();
 
     // Get values from EEPROM at startup
-    settings.load(&hardware);
+    settings.load(&hardware, &timer);
 
     // Wait a little bit for hardware to settle
     delay(500);

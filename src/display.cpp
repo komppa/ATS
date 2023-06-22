@@ -299,7 +299,10 @@ void updateManualDrive(FSM* dsm) {
 
 }
 
-void exitManualDrive(FSM* dsm) {}
+void exitManualDrive(FSM* dsm) {
+    // Flush key buffer to avoid old keypresses in other states
+    dsm->deps->settings->clear_num_buffer();
+}
 
 
 /**
@@ -311,8 +314,7 @@ void enterSettingsStabilityTime(FSM* dsm) {
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
         "STABILITY TI 2/4",
-        // "Change current value \"{3}\" by pressing * or press # to continue"
-        "Press #- to navigate further because this is not implemented yet"
+        "Change current value \"{3}\" by pressing * or press # to continue to next setting"
     );
 
 }
@@ -337,7 +339,10 @@ void updateSettingsStabilityTime(FSM* dsm) {
 
 }
 
-void exitSettingsStabilityTime(FSM* dsm) {}
+void exitSettingsStabilityTime(FSM* dsm) {
+    // Flush key buffer to avoid old keypresses in other states
+    dsm->deps->settings->clear_num_buffer();
+}
 
 /**
  * SWITCHINGDELAY -STATE
@@ -367,7 +372,10 @@ void updateSwitchingDelay(FSM* dsm) {
 
 }
 
-void exitSwitchingDelay(FSM* dsm) {}
+void exitSwitchingDelay(FSM* dsm) {
+    // Flush key buffer to avoid old keypresses in other states
+    dsm->deps->settings->clear_num_buffer();
+}
 
 
 /**
@@ -404,6 +412,9 @@ void updateWarmUpTime(FSM* dsm) {
 }
 
 void exitWarmUpTime(FSM* dsm) {
+    // Flush key buffer to avoid old keypresses in other states
+    dsm->deps->settings->clear_num_buffer();
+
     dsm->deps->writer->clear();
     dsm->deps->writer->setMode(RAW);
 }
@@ -418,15 +429,16 @@ void enterSettingsInput(FSM* dsm) {
     dsm->deps->settings->init_num_buffer();
     dsm->deps->settings->clear_num_buffer();
 
-    // Get saved source from eeprom
-    dsm->deps->settings->add_num_buffer(
-        dsm->deps->hardware->eepromRead(
-            EEPROM_ADDRESS_SOURCE
-        )
-    );
-
     switch (dsm->getPreviousState()->getState()) {
         case SETTINGSMANUALDRIVE:
+
+            // Get saved source from eeprom
+            dsm->deps->settings->add_num_buffer(
+                dsm->deps->hardware->eepromRead(
+                    EEPROM_ADDRESS_SOURCE
+                )
+            );
+
             // TODO CRIT there should be third option for manual input
             // source, 3 = AUTO
             // NOTE no need to implement if manual drive is "blocking" action
@@ -435,12 +447,22 @@ void enterSettingsInput(FSM* dsm) {
                 "{3}"
             );
             break;
+
         case SETTINGSSTABILITYTIME:
+
+            // Get current stability time from timer
+            int stability_time = dsm->deps->timer->get_initial_time(STABILITY_TIME);
+            dsm->deps->settings->add_big_num_buffer(
+                stability_time
+            );
+            
+            // Draw template
             dsm->deps->writer->write(
                 "Type new value for stability time and press # to save or press * to cancel without saving",
                 "{3}"
             );
             break;
+
         case SETTINGSSWITCHINGDELAY:
             break;
         case SETTINGSWARMUPTIME:
@@ -457,32 +479,46 @@ void updateSettingsInput(FSM* dsm) {
 
     char key = DISPLAY_GET_KEY;
     String key_buffer = dsm->deps->settings->get_num_buffer_string();
+    String current_input = "";
 
-    // Update entered variable that is saved on num buffer to screen
-    String source_name = "";
+    // Conditiional template drawing
+    switch (dsm->getPreviousState()->getState()) {
 
-    switch (dsm->deps->settings->get_num_buffer()->buffer[0]) {
-        case 1:
-            source_name = "GRID";
+        case SETTINGSMANUALDRIVE:
+            switch (dsm->deps->settings->get_num_buffer()->buffer[0]) {
+                case 1:
+                    current_input = "GRID";
+                    break;
+                case 2:
+                    current_input = "GENERATOR";
+                    break;
+                case 3:
+                    current_input = "AUTO";
+                    break;
+                default:
+                    current_input = "UNKNOWN";
+                    break;
+            }
+
+            dsm->deps->writer->variable(
+                SECOND,
+                // TODO ish? String "GRID" is longer than its template definition on
+                // enterSettingsInput. This works still just fine...
+                current_input
+            );
             break;
-        case 2:
-            source_name = "GENERATOR";
-            break;
-        case 3:
-            source_name = "AUTO";
-            break;
-        default:
-            source_name = "UNKNOWN";
+
+        case SETTINGSSTABILITYTIME:
+            // Just draw the number. On enter we draw the template and get the initial value
+            dsm->deps->writer->variable(
+                SECOND,
+                dsm->deps->settings->get_num_buffer_string()
+            );
             break;
     }
+    
 
-    dsm->deps->writer->variable(
-        SECOND,
-        // TODO ish? String "GRID" is longer than its template definition on
-        // enterSettingsInput. This works still just fine...
-        source_name
-    );
-
+    // Pressed some key
     if (key_is_number(key) == true) {
 
         // Stupid casting to get integer from the keypad
@@ -491,12 +527,29 @@ void updateSettingsInput(FSM* dsm) {
         switch (dsm->getPreviousState()->getState()) {
 
             case SETTINGSMANUALDRIVE:
+
                 // Since we are getting input for manual drive and it is
                 // represented with one digit, we allow one digit to be inputted
                 // at a time.
                 //
                 if (dsm->deps->settings->get_num_buffer()->length != 0) {
                     // Since there was already a digit(s), discard them and save
+                    // the new one to be possible input. (User can toggle between
+                    // 1 and 2 but when the user press # - it'll be saved)
+                    dsm->deps->settings->clear_num_buffer();
+                }
+                dsm->deps->settings->add_num_buffer(number);
+
+                break;
+
+            case SETTINGSSTABILITYTIME:
+
+                // Since we are getting input for stability time and it is
+                // represented with two digits, we allow two digits to be inputted
+                // at a time.
+                //
+                if (dsm->deps->settings->get_num_buffer()->length >= 2) {
+                    // Since there was already two digits, discard them and save
                     // the new one to be possible input. (User can toggle between
                     // 1 and 2 but when the user press # - it'll be saved)
                     dsm->deps->settings->clear_num_buffer();
@@ -512,29 +565,49 @@ void updateSettingsInput(FSM* dsm) {
 
     if (key == '#') {
 
-        source s = (enum source)dsm->deps->settings->get_num_buffer()->buffer[0];
-        // When save button is pressed on input state:
-        // 1) save new value if entered
-        // 2) move back to showing setting 1/4 where we came from
-        dsm->deps->settings->commit_setting(
-            // Hardware for accessing EEPROM
-            dsm->deps->hardware,
-            // NOTE: we are not telling that we are on input state but
-            // we are telling that we are on the state where we came from
-            // to distinguish between different settings.
-            dsm->getPreviousState()->getState(),
-            // Raw first digit integer
-            (int)s
-        );
+        switch (dsm->getPreviousState()->getState()) {
 
-        // By telling that override is active, we are ignoring state machine
-        // and just using override source. If the override source is set to
-        // AUTO (3), then we are not raising override flag to interrupt the
-        // ATS state machine.
-        // if ()
-        dsm->deps->settings->set_override_source(
-            s
-        );
+            case SETTINGSMANUALDRIVE:
+                
+                // When save button is pressed on input state:
+                // 1) save new value if entered
+                // 2) move back to showing setting 1/4 where we came from
+                dsm->deps->settings->commit_setting(
+                    // Hardware for accessing EEPROM
+                    dsm->deps->hardware,
+                    // NOTE: we are not telling that we are on input state but
+                    // we are telling that we are on the state where we came from
+                    // to distinguish between different settings.
+                    dsm->getPreviousState()->getState(),
+                    // Raw first digit integer
+                    dsm->deps->settings->get_num_buffer()->buffer[0]
+                );
+
+                // By telling that override is active, we are ignoring state machine
+                // and just using override source. If the override source is set to
+                // AUTO (3), then we are not raising override flag to interrupt the
+                // ATS state machine.
+                dsm->deps->settings->set_override_source(
+                    (enum source)dsm->deps->settings->get_num_buffer()->buffer[0]
+                );
+                break;
+
+            case SETTINGSSTABILITYTIME:
+                dsm->deps->timer->set_timer(
+                    STABILITY_TIME,
+                    dsm->deps->settings->get_num_buffer_int()
+                );
+                dsm->deps->settings->commit_setting(
+                    dsm->deps->hardware,
+                    dsm->getPreviousState()->getState(),
+                    // TODO CRIT (but works) cast from 'int*' to 'uint8_t {aka unsigned char}' loses precision [-fpermissive]
+                    (uint8_t)dsm->deps->settings->get_num_buffer()->buffer
+                );
+                break;
+
+            default:
+                break;
+        }
 
         // TODO this is not optimal place to switch contactors
         // TODO CRIT and therefore this has been disabled for now

@@ -57,9 +57,12 @@
 #define PIN_IS_SIMULATOR        53
 
 // EEPROM addresses
-static const int EEPROM_INITIALIZED = 42;
-static const int EEPROM_INIT_ADDRESS = 568; // Random address
-#define EEPROM_ADDRESS_SOURCE   0
+static const int EEPROM_INITIALIZED =   42;
+static const int EEPROM_INIT_ADDRESS =  568;    // Random address
+#define EEPROM_ADDRESS_SOURCE           0       // Left some space for future between 0 and 10
+#define EEPROM_ADDRESS_STABILITY_TIME   10      // Currently uint_8 saved here but there is space for future uint_16
+#define EEPROM_ADDRESS_WARM_UP_TIME     12
+#define EEPROM_ADDRESS_TRANSFER_TIME    14
 
 
 class Hardware {

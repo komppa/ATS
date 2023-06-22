@@ -184,8 +184,7 @@ void exitWaitGen(FSM *sm) {}
  * 
 */
 void enterWarmUp(FSM *sm) {
-    // Do not reset timer since genset might never go down.
-    // Just enable somewhere (Normal-state) previously resetted timer.
+    sm->deps->timer->reset_timer(WARM_UP_TIME);
     sm->deps->timer->enable_timer(WARM_UP_TIME, true);
 }
 

@@ -4,6 +4,7 @@
 #include "estates.h"
 #include <stdlib.h>
 #include "hardware.h"
+#include "timers.hpp"
 #ifndef UNIT_TEST
 #include <Arduino.h>
 #else
@@ -44,16 +45,18 @@ class Settings {
         source override_source;
     public:
         Settings();
-        void load(Hardware*);
+        void load(Hardware*, Timer*);
         // ~Settings();
         void init_num_buffer();
         void free_num_buffer();
         void clear_num_buffer();
         void add_num_buffer(int num);
+        void add_big_num_buffer(int);
+        int get_num_buffer_int();
         numBuffer* get_num_buffer();
         void set_override_source(source);
         overrideSource get_override();
-        void commit_setting(Hardware* hardware, States state, int value);
+        void commit_setting(Hardware* hardware, States state, uint8_t value);
         #ifndef UNIT_TEST
         String get_num_buffer_string();
         #else
