@@ -86,6 +86,11 @@ int Hardware::initEEPROM() {
 
             // By default, source is AUTO (3), not grid (1) or generator (2)
             EEPROM.write(EEPROM_ADDRESS_SOURCE, 3);
+
+            // By default, stability is 30 seconds, warmup 30 and transfer 5
+            EEPROM.write(EEPROM_ADDRESS_STABILITY_TIME, 30);
+            EEPROM.write(EEPROM_ADDRESS_WARM_UP_TIME, 30);
+            EEPROM.write(EEPROM_ADDRESS_SWITCHING_DELAY_TIME, 5);
             
             // Mark EEPROM as initialized
             EEPROM.write(EEPROM_INIT_ADDRESS, EEPROM_INITIALIZED);

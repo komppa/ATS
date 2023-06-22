@@ -28,6 +28,22 @@ void Settings::load(Hardware* hardware, Timer* timer) {
     }
 
     timer->set_timer(STABILITY_TIME, stability_time);
+
+    // Get warmup time
+    int warmup_time = hardware->eepromRead(EEPROM_ADDRESS_WARM_UP_TIME);
+    if (warmup_time < 0 || warmup_time > 255) {
+        warmup_time = 30;
+    }
+
+    timer->set_timer(WARM_UP_TIME, warmup_time);
+
+    // Get transfer time
+    int switching_delay_time = hardware->eepromRead(EEPROM_ADDRESS_SWITCHING_DELAY_TIME);
+    if (switching_delay_time < 0 || switching_delay_time > 255) {
+        switching_delay_time = 5;
+    }
+
+    timer->set_timer(SWITCHING_DELAY, switching_delay_time);
     
 
 }

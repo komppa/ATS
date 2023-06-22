@@ -451,9 +451,8 @@ void enterSettingsInput(FSM* dsm) {
         case SETTINGSSTABILITYTIME:
 
             // Get current stability time from timer
-            int stability_time = dsm->deps->timer->get_initial_time(STABILITY_TIME);
             dsm->deps->settings->add_big_num_buffer(
-                stability_time
+                dsm->deps->timer->get_initial_time(STABILITY_TIME)
             );
             
             // Draw template
@@ -464,9 +463,29 @@ void enterSettingsInput(FSM* dsm) {
             break;
 
         case SETTINGSSWITCHINGDELAY:
+
+            dsm->deps->settings->add_big_num_buffer(
+                dsm->deps->timer->get_initial_time(SWITCHING_DELAY)
+            );
+
+            dsm->deps->writer->write(
+                "Type new value for switching delay and press # to save or press * to cancel without saving",
+                "{3}"
+            );
             break;
+            
         case SETTINGSWARMUPTIME:
+
+            dsm->deps->settings->add_big_num_buffer(
+                dsm->deps->timer->get_initial_time(WARM_UP_TIME)
+            );
+
+            dsm->deps->writer->write(
+                "Type new value for warm up time and press # to save or press * to cancel without saving",
+                "{3}"
+            );
             break;
+
         default:
             dsm->transitionTo(DisplayStart);
             break;
@@ -515,6 +534,24 @@ void updateSettingsInput(FSM* dsm) {
                 dsm->deps->settings->get_num_buffer_string()
             );
             break;
+
+        case SETTINGSSWITCHINGDELAY:
+            dsm->deps->writer->variable(
+                SECOND,
+                dsm->deps->settings->get_num_buffer_string()
+            );
+            break;
+
+        case SETTINGSWARMUPTIME:
+            dsm->deps->writer->variable(
+                SECOND,
+                dsm->deps->settings->get_num_buffer_string()
+            );
+            break;
+
+        default:
+            break;
+
     }
     
 
@@ -543,6 +580,8 @@ void updateSettingsInput(FSM* dsm) {
                 break;
 
             case SETTINGSSTABILITYTIME:
+            case SETTINGSSWITCHINGDELAY:
+            case SETTINGSWARMUPTIME:
 
                 // Since we are getting input for stability time and it is
                 // represented with two digits, we allow two digits to be inputted
@@ -597,17 +636,32 @@ void updateSettingsInput(FSM* dsm) {
                     STABILITY_TIME,
                     dsm->deps->settings->get_num_buffer_int()
                 );
-                dsm->deps->settings->commit_setting(
-                    dsm->deps->hardware,
-                    dsm->getPreviousState()->getState(),
-                    // TODO CRIT (but works) cast from 'int*' to 'uint8_t {aka unsigned char}' loses precision [-fpermissive]
-                    (uint8_t)dsm->deps->settings->get_num_buffer()->buffer
+                break;
+
+            case SETTINGSSWITCHINGDELAY:
+                dsm->deps->timer->set_timer(
+                    SWITCHING_DELAY,
+                    dsm->deps->settings->get_num_buffer_int()
+                );
+                break;
+
+            case SETTINGSWARMUPTIME:
+                dsm->deps->timer->set_timer(
+                    WARM_UP_TIME,
+                    dsm->deps->settings->get_num_buffer_int()
                 );
                 break;
 
             default:
                 break;
         }
+
+        dsm->deps->settings->commit_setting(
+            dsm->deps->hardware,
+            dsm->getPreviousState()->getState(),
+            // TODO CRIT (but works) cast from 'int*' to 'uint8_t {aka unsigned char}' loses precision [-fpermissive]
+            (uint8_t*)(dsm->deps->settings->get_num_buffer()->buffer)
+        );
 
         // TODO this is not optimal place to switch contactors
         // TODO CRIT and therefore this has been disabled for now
