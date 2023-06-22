@@ -30,23 +30,23 @@ TEST(states, keep_normal_on_when_grid_on) {
     MOCK_VOLTAGE(PIN_VOLTAGE_GRID, 250);
         
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "UnknownStart"
+        sm.getCurrentState().getState(),
+        UNKNOWNSTART
     );
 
     sm.update();
     sm.update();
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Normal"
+        sm.getCurrentState().getState(),
+        NORMAL
     );
 
     sm.update();
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Normal"
+        sm.getCurrentState().getState(),
+        NORMAL
     );
 
 }

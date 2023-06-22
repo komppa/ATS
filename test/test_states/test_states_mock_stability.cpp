@@ -29,8 +29,8 @@ TEST(states, transfer_to_waitgen_when_timeout) {
     MOCK_VOLTAGE(PIN_VOLTAGE_GENERATOR, 0);
         
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Stability"
+        sm.getCurrentState().getState(),
+        STABILITY
     );
 
     sm.update();
@@ -43,8 +43,8 @@ TEST(states, transfer_to_waitgen_when_timeout) {
     
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "WaitGen"
+        sm.getCurrentState().getState(),
+        WAITGEN
     );
 
 }
@@ -68,8 +68,8 @@ TEST(states, do_not_transfer_to_waitgen_when_no_timeout) {
     MOCK_VOLTAGE(PIN_VOLTAGE_GENERATOR, 0);
     
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Stability"
+        sm.getCurrentState().getState(),
+        STABILITY
     );
 
     sm.update();
@@ -83,8 +83,8 @@ TEST(states, do_not_transfer_to_waitgen_when_no_timeout) {
     
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Stability"
+        sm.getCurrentState().getState(),
+        STABILITY
     );
 
 }
@@ -108,8 +108,8 @@ TEST(states, get_back_to_grid_if_it_returns_after_timeout) {
     MOCK_VOLTAGE(PIN_VOLTAGE_GENERATOR, 0);
     
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Stability"
+        sm.getCurrentState().getState(),
+        STABILITY
     );
 
     sm.update();
@@ -123,8 +123,8 @@ TEST(states, get_back_to_grid_if_it_returns_after_timeout) {
     
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Normal"
+        sm.getCurrentState().getState(),
+        NORMAL
     );
 
 }
@@ -148,8 +148,8 @@ TEST(states, switchdelaytogrid_when_both_sources_on) {
     MOCK_VOLTAGE(PIN_VOLTAGE_GENERATOR, 240);
     
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Stability"
+        sm.getCurrentState().getState(),
+        STABILITY
     );
 
     sm.update();
@@ -163,8 +163,8 @@ TEST(states, switchdelaytogrid_when_both_sources_on) {
     
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "SwitchDelayToGrid"
+        sm.getCurrentState().getState(),
+        SWITCHDELAYTOGRID
     );
 
 }
@@ -188,8 +188,8 @@ TEST(states, do_not_transfer_to_switchdelaytogrid_when_both_sources_on_but_no_ti
     MOCK_VOLTAGE(PIN_VOLTAGE_GENERATOR, 240);
     
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Stability"
+        sm.getCurrentState().getState(),
+        STABILITY
     );
 
     sm.update();
@@ -203,8 +203,8 @@ TEST(states, do_not_transfer_to_switchdelaytogrid_when_both_sources_on_but_no_ti
     
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Stability"
+        sm.getCurrentState().getState(),
+        STABILITY
     );
 
 }

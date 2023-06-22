@@ -29,8 +29,8 @@ TEST(states, waitgen_transfer_out_when_gen_starts) {
     MOCK_VOLTAGE(PIN_VOLTAGE_GENERATOR, 240);
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "WaitGen"
+        sm.getCurrentState().getState(),
+        WAITGEN
     );
 
     sm.update();
@@ -39,8 +39,8 @@ TEST(states, waitgen_transfer_out_when_gen_starts) {
     
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "WarmUp"
+        sm.getCurrentState().getState(),
+        WARMUP
     );
 
 }
@@ -64,8 +64,8 @@ TEST(states, waitgen_transfer_back_to_stability_if_grid_restores) {
     MOCK_VOLTAGE(PIN_VOLTAGE_GENERATOR, 0);
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "WaitGen"
+        sm.getCurrentState().getState(),
+        WAITGEN
     );
 
     sm.update();
@@ -74,8 +74,8 @@ TEST(states, waitgen_transfer_back_to_stability_if_grid_restores) {
     
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Stability"
+        sm.getCurrentState().getState(),
+        STABILITY
     );
 
 }
@@ -99,8 +99,8 @@ TEST(states, waitgen_wait_if_all_down) {
     MOCK_VOLTAGE(PIN_VOLTAGE_GENERATOR, 0);
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "WaitGen"
+        sm.getCurrentState().getState(),
+        WAITGEN
     );
 
     sm.update();
@@ -109,8 +109,8 @@ TEST(states, waitgen_wait_if_all_down) {
     
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "WaitGen"
+        sm.getCurrentState().getState(),
+        WAITGEN
     );
 
 }

@@ -26,8 +26,8 @@ TEST(states, warmup_do_nothing_if_no_timeout) {
     FSM sm = FSM(WarmUp, &deps);
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "WarmUp"
+        sm.getCurrentState().getState(),
+        WARMUP
     );
 
     sm.update();
@@ -41,8 +41,8 @@ TEST(states, warmup_do_nothing_if_no_timeout) {
     sm.update();
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "WarmUp"
+        sm.getCurrentState().getState(),
+        WARMUP
     );
 
 }
@@ -63,8 +63,8 @@ TEST(states, warmup_transfer_to_switchdelaytogen_if_timeout) {
     FSM sm = FSM(WarmUp, &deps);
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "WarmUp"
+        sm.getCurrentState().getState(),
+        WARMUP
     );
 
     sm.update();
@@ -78,8 +78,8 @@ TEST(states, warmup_transfer_to_switchdelaytogen_if_timeout) {
     sm.update();
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "SwitchDelayToGen"
+        sm.getCurrentState().getState(),
+        SWITCHDELAYTOGEN
     );
 
 }

@@ -31,8 +31,8 @@ TEST(states, transfer_to_normal_when_generator_goes_down) {
     MOCK_VOLTAGE(PIN_VOLTAGE_GENERATOR, 0);
     
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Normal2"
+        sm.getCurrentState().getState(),
+        NORMAL2
     );
 
     sm.update();
@@ -42,8 +42,8 @@ TEST(states, transfer_to_normal_when_generator_goes_down) {
     sm.update();
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Normal"
+        sm.getCurrentState().getState(),
+        NORMAL
     );
 
 }
@@ -69,8 +69,8 @@ TEST(states, do_not_transfer_anywhere_if_static) {
     MOCK_VOLTAGE(PIN_VOLTAGE_GENERATOR, 250);
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Normal2"
+        sm.getCurrentState().getState(),
+        NORMAL2
     );
 
     // At least enough of updates to ensure
@@ -82,8 +82,8 @@ TEST(states, do_not_transfer_anywhere_if_static) {
     sm.update();
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Normal2"
+        sm.getCurrentState().getState(),
+        NORMAL2
     );
 
 }
@@ -109,8 +109,8 @@ TEST(states, normal2_to_waitgen_if_grid_goes_down) {
     MOCK_VOLTAGE(PIN_VOLTAGE_GENERATOR, 250);
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Normal2"
+        sm.getCurrentState().getState(),
+        NORMAL2
     );
 
     sm.update();
@@ -118,8 +118,8 @@ TEST(states, normal2_to_waitgen_if_grid_goes_down) {
     sm.update();
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "WaitGen"
+        sm.getCurrentState().getState(),
+        WAITGEN
     );
 
 }

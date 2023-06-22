@@ -31,8 +31,8 @@ TEST(states, transfer_to_normal2_when_both_sources_up) {
     MOCK_VOLTAGE(PIN_VOLTAGE_GENERATOR, 250);
     
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Normal"
+        sm.getCurrentState().getState(),
+        NORMAL
     );
 
     sm.update();
@@ -40,8 +40,8 @@ TEST(states, transfer_to_normal2_when_both_sources_up) {
     sm.update();
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Normal2"
+        sm.getCurrentState().getState(),
+        NORMAL2
     );
 
 }
@@ -67,8 +67,8 @@ TEST(states, do_not_transfer_anywhere_if_grid_up) {
     MOCK_VOLTAGE(PIN_VOLTAGE_GENERATOR, 0);
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Normal"
+        sm.getCurrentState().getState(),
+        NORMAL
     );
 
     // At least enough of updates to ensure
@@ -80,8 +80,8 @@ TEST(states, do_not_transfer_anywhere_if_grid_up) {
     sm.update();
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Normal"
+        sm.getCurrentState().getState(),
+        NORMAL
     );
 
 }
@@ -107,8 +107,8 @@ TEST(states, transfer_to_stability_when_grid_goes_down) {
     MOCK_VOLTAGE(PIN_VOLTAGE_GENERATOR, 0);
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Normal"
+        sm.getCurrentState().getState(),
+        NORMAL
     );
 
     sm.update();
@@ -116,8 +116,8 @@ TEST(states, transfer_to_stability_when_grid_goes_down) {
     sm.update();
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Stability"
+        sm.getCurrentState().getState(),
+        STABILITY
     );
 
 }

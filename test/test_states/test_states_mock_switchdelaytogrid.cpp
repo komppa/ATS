@@ -26,8 +26,8 @@ TEST(states, switchdelaytogrid_transfer_to_normal_after_transfer_delay) {
     FSM sm = FSM(SwitchDelayToGrid, &deps);
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "SwitchDelayToGrid"
+        sm.getCurrentState().getState(),
+        SWITCHDELAYTOGRID
     );
 
     sm.update();
@@ -38,8 +38,8 @@ TEST(states, switchdelaytogrid_transfer_to_normal_after_transfer_delay) {
     sm.update();
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "Normal"
+        sm.getCurrentState().getState(),
+        NORMAL
     );
 
 }
@@ -60,8 +60,8 @@ TEST(states, switchdelaytogrid_do_not_transfer_to_normal_if_no_timeout) {
     FSM sm = FSM(SwitchDelayToGrid, &deps);
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "SwitchDelayToGrid"
+        sm.getCurrentState().getState(),
+        SWITCHDELAYTOGRID
     );
 
     sm.update();
@@ -71,8 +71,8 @@ TEST(states, switchdelaytogrid_do_not_transfer_to_normal_if_no_timeout) {
     sm.update();
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "SwitchDelayToGrid"
+        sm.getCurrentState().getState(),
+        SWITCHDELAYTOGRID
     );
 
 }

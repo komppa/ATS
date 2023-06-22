@@ -30,15 +30,15 @@ TEST(states, switchtogen_ensure_contactor_calls) {
     FSM sm = FSM(SwitchToGen, &deps);
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "SwitchToGen"
+        sm.getCurrentState().getState(),
+        SWITCHTOGEN
     );
 
     sm.update();
 
     EXPECT_EQ(
-        sm.getCurrentState().getStateName(),
-        "SwitchToGen"
+        sm.getCurrentState().getState(),
+        SWITCHTOGEN
     );
 
 }
