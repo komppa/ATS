@@ -15,9 +15,9 @@ jobs:
           docker build --no-cache -t 5bcf4108 .
       - name: Start container and test
         run: |
-          docker run -v /tmp/5bcf4108_output:/home/ci/project/output --rm 5bcf4108
+          docker run -v /tmp/5bcf4108_output:/home/ci/app/output --rm 5bcf4108
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v3
         if: always() # always run even if the previous step fails
         with:
-          report_paths: '/tmp/5bcf4108_output/pio-test-report-ATS-*.xml'
+          report_paths: '/tmp/5bcf4108_output/pio-test-report-ATS-*.xml'-v /tmp/5bcf4108_output:/home/ci/app/output
