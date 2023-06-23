@@ -14,6 +14,7 @@
 #include "FiniteStateMachine.hpp"   // for Deps
 #include "display.h"
 #include "settings.h"
+#include "logger.h"
 
 
 // Display contacts: VSS=GND, VDD=5V, RW=GND, A=5V(VIA 220OHM RESISTOR), K=GND 
@@ -66,8 +67,14 @@ byte grid_icon[8] = {B10001, B11111, B10001, B10001, B10001, B10001, B10001, B10
 
 
 void setup() {
+
     Serial.begin(115200);
+
+    LOG(INFO, "Starting ATS - Automatic Transfer Switch");
+
+    LOG(DEBUG, "Initializing LCD");
     lcd.begin(DISPLAY_WIDTH, 2);
+    LOG(DEBUG, "Initialized LCD");
 
     lcd.createChar(ICON_GRID, grid_icon);
     lcd.createChar(ICON_GENERATOR, generator_icon);
@@ -88,10 +95,14 @@ void setup() {
     pinMode(PIN_VOLTAGE_GENERATOR, INPUT_PULLUP);
 
     // Init EEPROM
+    LOG(DEBUG, "Initializing HW EEPROM");
     hardware.initEEPROM();
+    LOG(DEBUG, "Initialized EEPROM & loading settings");
 
     // Get values from EEPROM at startup
     settings.load(&hardware, &timer);
+    LOG(DEBUG, "Loaded settings from EEPROM");
+
 
     // Wait a little bit for hardware to settle
     delay(500);
@@ -105,6 +116,7 @@ void loop() {
     delay(100);
 
     if (settings.get_override().active) {
+        LOG(DEBUG, "Override mode active");
         // Display the override message on the LCD
         lcd.clear();
         lcd.setCursor(0, 0);
