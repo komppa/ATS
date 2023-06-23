@@ -53,10 +53,10 @@ class Writer {
         writeMode getMode();
         int setMode(writeMode new_mode);
         int clear();
-        int write(String row);
-        int write(String row, String second_row);
+        void write(String row);
+        void write(String row, String second_row);
         String variableToRow(writeRow row_select, int characters, String text, String variable);
-        int variable(writeRow row, String var);
+        void variable(writeRow row, String var);
         int update();
         int set_write_to_row(writeRow new_write_row);
         Variables variables;

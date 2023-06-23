@@ -660,7 +660,7 @@ void updateSettingsInput(FSM* dsm) {
             dsm->deps->hardware,
             dsm->getPreviousState()->getState(),
             // TODO CRIT (but works) cast from 'int*' to 'uint8_t {aka unsigned char}' loses precision [-fpermissive]
-            (uint8_t*)(dsm->deps->settings->get_num_buffer()->buffer)
+            *(dsm->deps->settings->get_num_buffer()->buffer)
         );
 
         // TODO this is not optimal place to switch contactors

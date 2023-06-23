@@ -170,7 +170,7 @@ int Writer::clear() {
     return 0;
 }
 
-int Writer::write(String row) {
+void Writer::write(String row) {
     this->write(row, "");
 }
 
@@ -184,8 +184,8 @@ String Writer::variableToRow(writeRow row_select, int characters, String text, S
     // than the reserved length for it
     String padded_variable = "";
 
-    if (variable.length() < characters) {
-        for (int i = 0; i < (characters - variable.length()); i++) {
+    if ((int)(variable.length()) < characters) {
+        for (int i = 0; i < (characters - (int)(variable.length())); i++) {
             padded_variable += " ";
         }
         padded_variable += variable;
@@ -218,7 +218,7 @@ String Writer::variableToRow(writeRow row_select, int characters, String text, S
     );
 }
 
-int Writer::write(String row, String second_row = "") {
+void Writer::write(String row, String second_row = "") {
 
     // Check whether there are variable placeholders
     this->variables.first.start_index = row.indexOf('{');
@@ -399,13 +399,11 @@ int Writer::write(String row, String second_row = "") {
             break;
 
     }
-    
-    return 0;
   
 }
 
 
-int Writer::variable(writeRow row_select, String var) {
+void Writer::variable(writeRow row_select, String var) {
 
     // TODO is there any reserved space for showing deynamic variable
     
