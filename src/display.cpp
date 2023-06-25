@@ -231,7 +231,7 @@ void enterSettingsStart(FSM* dsm) {
 
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
-        ">>SETTINGS<< 0/4",
+        ">>SETTINGS<< 0/3",
         "Press #- to cycle settings"
     );
 
@@ -242,7 +242,10 @@ void updateSettingsStart(FSM* dsm) {
     char key = DISPLAY_GET_KEY;
 
     if (key == '#') {
-        dsm->transitionTo(SettingsManualDrive);
+        // DISABLED - manual drive is not implemented completely
+        // dsm->transitionTo(SettingsManualDrive);
+
+        dsm->transitionTo(SettingsStabilityTime);
     }
 
     if (key == '*') {
@@ -313,7 +316,7 @@ void enterSettingsStabilityTime(FSM* dsm) {
 
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
-        "STABILITY TI 2/4",
+        "STABILITY TI 1/3",
         "Change current value \"{3}\" by pressing * or press # to continue to next setting"
     );
 
@@ -352,7 +355,7 @@ void enterSwitchingDelay(FSM* dsm) {
 
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
-        "SWITCH DELAY 3/4",
+        "SWITCH DELAY 2/3",
         "Press #- to navigate further because this is not implemented yet"
     );
 
@@ -386,7 +389,7 @@ void enterWarmUpTime(FSM* dsm) {
 
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
-        "WARM UP TIME 4/4",
+        "WARM UP TIME 3/3",
         "Press #- to navigate further because this is not implemented yet"
     );
 

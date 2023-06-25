@@ -137,10 +137,10 @@ void loop() {
     }
 
     // Regular updates
-    sm.update();
     timer.update();
     writer.update();
     if (millis() > 1000) {
+        sm.update();
         display.update();
     }
 }
