@@ -38,6 +38,7 @@ Writer writer = Writer(&lcd);
 Hardware hardware;
 Timer timer(&hardware);
 Settings settings;
+Logger logger(&hardware);
 
 Deps ATSFSMDeps = {
     .hardware = &hardware,
