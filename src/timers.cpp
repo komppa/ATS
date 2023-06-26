@@ -98,6 +98,10 @@ void Timer::set_timer(TimerSelection timer, int initial_time) {
         case WARM_UP_TIME:
             this->timers.initial_warm_up_time = initial_time;
             break;
+        case ALL:
+            this->timers.initial_stability_time = initial_time;
+            this->timers.initial_switching_delay = initial_time;
+            this->timers.initial_warm_up_time = initial_time;
         default:
             break;
     }

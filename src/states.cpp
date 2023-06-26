@@ -131,21 +131,41 @@ void updateStability(FSM *sm) {
         sm->transitionTo(WaitGen);
     }
 
-    if (
-        sm->deps->timer->get_remaining_time(STABILITY_TIME) == 0 &&
-        is_grid_up(sm->deps->hardware) == true &&
-        is_generator_up(sm->deps->hardware) == false
-    ) {
-        sm->transitionTo(Normal);
+    
+    if (sm->getPreviousState()->getState() == NORMAL) {
+        // We are coming from Normal state, so we need to check if grid is up
+        // and generator is down. If so, we can go back to Normal state
+        if (
+            sm->deps->timer->get_remaining_time(STABILITY_TIME) == 0 &&
+            is_grid_up(sm->deps->hardware) == true &&
+            is_generator_up(sm->deps->hardware) == false
+        ) {
+            sm->transitionTo(Normal);
+        }
+
+        // Both grid and generator are up, so we can go to Normal2 state
+        // to show that generator is up
+        if (
+            sm->deps->timer->get_remaining_time(STABILITY_TIME) == 0 &&
+            is_grid_up(sm->deps->hardware) == true &&
+            is_generator_up(sm->deps->hardware) == true
+        ) {
+            sm->transitionTo(Normal2);
+        }
     }
 
-    if (
-        is_grid_up(sm->deps->hardware) == true &&
-        is_generator_up(sm->deps->hardware) == true &&
-        sm->deps->timer->get_remaining_time(STABILITY_TIME) == 0
-    ) {
-        sm->transitionTo(SwitchDelayToGrid);
+    // If we are coming from SwitchDelayToGen state, we need to
+    // go transfer delay protection before we can go to Normal state!
+    if (sm->getPreviousState()->getState() == SWITCHTOGEN) {
+        if (
+            sm->deps->timer->get_remaining_time(STABILITY_TIME) == 0 &&
+            is_grid_up(sm->deps->hardware) == true
+        ) {
+            sm->transitionTo(SwitchDelayToGrid);
+        }
     }
+
+    
 
 }
 
@@ -304,8 +324,18 @@ void updateSwitchDelayToGrid(FSM *sm) {
     // Grid contactor is not activated here,
     // it is done by Normal-state
 
-    if (sm->deps->timer->get_remaining_time(SWITCHING_DELAY) == 0) {
+    if (
+        sm->deps->timer->get_remaining_time(SWITCHING_DELAY) == 0 &&
+        is_generator_up(sm->deps->hardware) == false
+    ) {
         sm->transitionTo(Normal);
+    }
+
+    if (
+        sm->deps->timer->get_remaining_time(SWITCHING_DELAY) == 0 &&
+        is_generator_up(sm->deps->hardware) == true
+    ) {
+        sm->transitionTo(Normal2);
     }
 
 }
