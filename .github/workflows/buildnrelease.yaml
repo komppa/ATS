@@ -13,18 +13,23 @@ jobs:
 
       - name: Build docker image
         run: |
-          docker build --no-cache -t pioimage .
-
-      - name: Build and publish memory usage
+          docker build --no-cache -t 5bcf4108 .
+          
+      - name: Build and publish memory usage and check version
+        id: version_check
+        continue-on-error: true
         run: |
-          docker run --entrypoint /entrypointRelease.sh -e "GISTS_TOKEN=${{ secrets.GISTS_TOKEN }}" -v $PWD/.pio:/home/ci/app/.pio --rm pioimage
+          exit_status=$(docker run --entrypoint /entrypointRelease.sh -e "GISTS_TOKEN=${{ secrets.GISTS_TOKEN }}" -v $PWD/.pio:/home/ci/app/.pio --rm 5bcf4108; echo $?)
+          echo "::set-output name=status::$exit_status"
 
       - name: Get the date for release
         id: date
+        if: steps.version_check.outputs.status == '1'
         run: echo "::set-output name=date::$(date +'%Y%m%d%H%M%S')"
 
       - name: Create Release
         id: create_release
+        if: steps.version_check.outputs.status == '1'
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -35,7 +40,8 @@ jobs:
           prerelease: false
       
       - name: Upload Release Asset
-        id: upload-release-asset 
+        id: upload-release-asset
+        if: steps.version_check.outputs.status == '1'
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
