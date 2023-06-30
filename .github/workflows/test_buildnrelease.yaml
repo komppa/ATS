@@ -35,8 +35,12 @@ jobs:
         id: version_check
         continue-on-error: true
         run: |
-          exit_status=$(docker run --entrypoint /entrypointRelease.sh -e "GISTS_TOKEN=${{ secrets.GISTS_TOKEN }}" -v $PWD/.pio:/home/ci/app/.pio --rm 5bcf4108; echo $?)
+          container_id=$(docker run -d --entrypoint /entrypointRelease.sh -e "GISTS_TOKEN=${{ secrets.GISTS_TOKEN }}" -v $PWD/.pio:/home/ci/app/.pio 5bcf4108)
+          docker wait $container_id
+          exit_status=$(docker inspect $container_id --format='{{.State.ExitCode}}')
+          echo "Exit Status: $exit_status"
           echo "::set-output name=status::$exit_status"
+
 
       - name: Get the date for release
         id: date
