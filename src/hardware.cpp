@@ -1,4 +1,7 @@
 #include "hardware.h"
+#ifndef UNIT_TEST
+#include <EEPROM.h>
+#endif // UNIT_TEST
 
 
 Hardware::Hardware() {}

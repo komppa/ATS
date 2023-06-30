@@ -9,7 +9,7 @@
 State DisplayUnknownStart = State(DISPLAYUNKNOWNSTART, &updateDisplayUnknownStart);
 State DisplayStart = State(DISPLAYSTART, &enterDisplayStart, &updateDisplayStart, &exitDisplayStart);
 State SettingsStart = State(SETTINGSSTART, &enterSettingsStart, &updateSettingsStart, &exitSettingsStart);
-State SettingsManualDrive = State(SETTINGSMANUALDRIVE, &enterManualDrive, &updateManualDrive, &exitManualDrive);
+// State SettingsManualDrive = State(SETTINGSMANUALDRIVE, &enterManualDrive, &updateManualDrive, &exitManualDrive);
 State SettingsStabilityTime = State(SETTINGSSTABILITYTIME, &enterSettingsStabilityTime, &updateSettingsStabilityTime, &exitSettingsStabilityTime);
 State SettingsSwitchingDelay = State(SETTINGSSWITCHINGDELAY, &enterSwitchingDelay, &updateSwitchingDelay, &exitSwitchingDelay);
 State SettingsWarmUpTime = State(SETTINGSWARMUPTIME, &enterWarmUpTime, &updateWarmUpTime, &exitWarmUpTime);
@@ -276,6 +276,7 @@ void exitSettingsStart(FSM* dsm) {}
  * MANUALDRIVE -STATE
  * 
 */
+/*
 void enterManualDrive(FSM* dsm) {
 
     dsm->deps->writer->clear();
@@ -306,7 +307,7 @@ void exitManualDrive(FSM* dsm) {
     // Flush key buffer to avoid old keypresses in other states
     dsm->deps->settings->clear_num_buffer();
 }
-
+*/
 
 /**
  * SETTINGSSTABILITYTIME -STATE

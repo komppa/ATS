@@ -5,18 +5,12 @@
 #include "ZMPT101B.h"
 
 // If building release for Arduino, include it to be used by this class
-#ifndef UNIT_TEST
-#include <Arduino.h>
-#include <EEPROM.h>
-#endif
-
-#ifdef ARDUINO
-#include <Arduino.h>
-#endif
-
 #ifdef UNIT_TEST
 #include "gmock/gmock.h"
+#else
+#include <Arduino.h>
 #endif
+
 
 #define UNKNOWN -1
 #define MOCK_VOLTAGE(pin, ret_val) (ON_CALL(hardware, getVoltageAC(pin)).WillByDefault(Return(ret_val)))
