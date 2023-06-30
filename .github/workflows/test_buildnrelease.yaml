@@ -1,4 +1,4 @@
-name: BuildNRelease
+name: TestBuildNRelease
 
 on:
   push:
@@ -6,7 +6,23 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  test:
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build docker image
+        run: |
+          docker build --no-cache -t 5bcf4108 .
+      - name: Start container and test
+        run: |
+          docker run -v /tmp/5bcf4108_output:/home/ci/app/output --rm 5bcf4108
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v3
+        if: always() # always run even if the previous step fails
+        with:
+          report_paths: '/tmp/5bcf4108_output/pio-test-report-ATS-*.xml'
+  build_and_release:
+    needs: test
     runs-on: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v3
