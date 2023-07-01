@@ -41,11 +41,10 @@ jobs:
           echo "Exit Status: $exit_status"
           echo "::set-output name=status::$exit_status"
 
-
-      - name: Get the date for release
-        id: date
+      - name: Get the version for release
+        id: version
         if: steps.version_check.outputs.status == '1'
-        run: echo "::set-output name=date::$(date +'%Y%m%d%H%M%S')"
+        run: echo "::set-output name=version::$(cat VERSION)"
 
       - name: Create Release
         id: create_release
@@ -54,11 +53,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.date.outputs.date }}
-          release_name: Release ${{ steps.date.outputs.date }}
+          tag_name: ${{ steps.version.outputs.version }}
+          release_name: Release ${{ steps.version.outputs.version }}
           draft: false
           prerelease: false
-      
+
       - name: Upload Release Asset
         id: upload-release-asset
         if: steps.version_check.outputs.status == '1'
