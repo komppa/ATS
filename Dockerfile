@@ -6,7 +6,7 @@ WORKDIR /home/ci/app
 
 RUN apt update
 
-RUN apt install -y python3 python3-pip curl
+RUN apt install -y python3 python3-pip curl jq
 
 RUN pip3 install -U platformio
 

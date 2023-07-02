@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Build docker image
         run: |
-          docker build --no-cache -t 5bcf4108 .
+          docker build -t 5bcf4108 .
       - name: Start container and test
         run: |
           docker run -v /tmp/5bcf4108_output:/home/ci/app/output --rm 5bcf4108
@@ -29,7 +29,7 @@ jobs:
 
       - name: Build docker image
         run: |
-          docker build --no-cache -t 5bcf4108 .
+          docker build -t 5bcf4108 .
           
       - name: Build and publish memory usage and check version
         id: version_check
