@@ -147,6 +147,4 @@ void loop() {
 }
 
 
-
-
 #endif // Do not compile setup and loop if unit testing

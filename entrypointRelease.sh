@@ -27,6 +27,7 @@ LAST_VERSION=$(fetch_version_from_gist)
 CURRENT_VERSION=$(cat VERSION)
 
 if [ "$CURRENT_VERSION" != "$LAST_VERSION" ]; then
+    echo "Version has changed from $LAST_VERSION to $CURRENT_VERSION"
     # Update the version in gist
     update_version_in_gist $CURRENT_VERSION
     # Use exit code 1 to indicate that VERSION has changed
