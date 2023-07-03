@@ -53,15 +53,28 @@
 // EEPROM addresses
 static const int EEPROM_INITIALIZED =           42;
 static const int EEPROM_INIT_ADDRESS =          568;    // Random address
+
 #define EEPROM_ADDRESS_SOURCE                   0       // Left some space for future between 0 and 10
 #define EEPROM_ADDRESS_STABILITY_TIME           10      // Currently uint_8 saved here but there is space for future uint_16
 #define EEPROM_ADDRESS_WARM_UP_TIME             12
 #define EEPROM_ADDRESS_SWITCHING_DELAY_TIME     14
 
+#define EEPROM_ADDRESS_GRID_ZERO_VOLTAGE_POINT  16
+#define EEPROM_ADDRESS_GRID_KNOWN_VOLTAGE_POINT 18
+#define EEPROM_ADDRESS_GENERATOR_ZERO_VOLTAGE_POINT 20
+#define EEPROM_ADDRESS_GENERATOR_KNOWN_VOLTAGE_POINT 22
+#define EEPROM_ADDRESS_LOAD_ZERO_VOLTAGE_POINT  24
+#define EEPROM_ADDRESS_LOAD_KNOWN_VOLTAGE_POINT 26
+
+
 
 class Hardware {
     private:
         int my_var;
+        // For voltage sensors
+        ZMPT101B z_grid;
+        ZMPT101B z_generator;
+        ZMPT101B z_load;
     public:
         Hardware();
         // Arduino ones
@@ -71,6 +84,8 @@ class Hardware {
         virtual void wait(unsigned long ms);
         // Voltage sensor to be able to mocked
         virtual int getVoltageAC(uint8_t pin);
+        virtual int calibrateKnownVoltage(uint8_t pin, uint16_t knownVoltage);
+    	virtual int calibrateZeroVoltage(uint8_t pin);
         virtual bool isSimulator();
         // TODO mocs for eeprom
         virtual int initEEPROM();

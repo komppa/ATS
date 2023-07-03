@@ -25,6 +25,10 @@ void ZMPT101B::setSensitivity(float sens) {
 	sensitivity = sens;
 }
 
+float ZMPT101B::getSensitivity() {
+	return this->sensitivity;
+}
+
 float ZMPT101B::getVoltageDC() {
 	int16_t acc = 0;
 	for (int i = 0; i < 10; i++) {

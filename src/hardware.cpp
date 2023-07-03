@@ -4,7 +4,10 @@
 #endif // UNIT_TEST
 
 
-Hardware::Hardware() {}
+Hardware::Hardware()
+    : z_grid(PIN_VOLTAGE_GRID),
+      z_generator(PIN_VOLTAGE_GENERATOR),
+      z_load(PIN_VOLTAGE_LOAD) {}
 
 unsigned long Hardware::time() {
     #ifdef ARDUINO
@@ -60,12 +63,79 @@ int Hardware::getVoltageAC(uint8_t pin) {
 
        return 0;
     }
-    ZMPT101B z = ZMPT101B(pin);
-    float v = z.getVoltageAC() * 10;
+
+    float v;
+
+    if (pin == PIN_VOLTAGE_GRID) {
+        v = this->z_grid.getVoltageAC() * 10;
+    } else if (pin == PIN_VOLTAGE_GENERATOR) {
+        v = this->z_generator.getVoltageAC() * 10;
+    } else if (pin == PIN_VOLTAGE_LOAD) {
+        v = this->z_load.getVoltageAC() * 10;
+    } else {
+        return UNKNOWN;
+    }
+
     return floor(v);
-    #else
+
+    #else // ARDUINO
     return UNKNOWN;
-    #endif
+    #endif // ARDUINO
+}
+
+int Hardware::calibrateKnownVoltage(uint8_t pin, uint16_t knownVoltage) {
+
+    #ifdef ARDUINO
+    if (digitalRead(PIN_IS_SIMULATOR) == 0) {
+        return UNKNOWN;
+    }
+
+    float expectedAdc = (knownVoltage / VREF) * ADC_SCALE;
+
+    if (pin == PIN_VOLTAGE_GRID) {
+        float readAdc = this->z_grid.getVoltageAC();
+        float newSensitivity = (readAdc / expectedAdc) * this->z_grid.getSensitivity();
+        this->z_grid.setSensitivity(newSensitivity);
+    } else if (pin == PIN_VOLTAGE_GENERATOR) {
+        float readAdc = this->z_generator.getVoltageAC();
+        float newSensitivity = (readAdc / expectedAdc) * this->z_generator.getSensitivity();
+        this->z_generator.setSensitivity(newSensitivity);
+    } else if (pin == PIN_VOLTAGE_LOAD) {
+        float readAdc = this->z_load.getVoltageAC();
+        float newSensitivity = (readAdc / expectedAdc) * this->z_load.getSensitivity();
+        this->z_load.setSensitivity(newSensitivity);
+    } else {
+        return UNKNOWN;
+    }
+
+    return 0;
+
+    #else // ARDUINO
+    return UNKNOWN;
+    #endif // ARDUINO
+}
+
+int Hardware::calibrateZeroVoltage(uint8_t pin) {
+    #ifdef ARDUINO
+    if (digitalRead(PIN_IS_SIMULATOR) == 0) {
+        return UNKNOWN;
+    }
+
+    int zeroPoint;
+
+    if (pin == PIN_VOLTAGE_GRID) {
+        zeroPoint = this->z_grid.calibrate();
+        this->z_grid.setZeroPoint(zeroPoint);
+    } else if (pin == PIN_VOLTAGE_GENERATOR) {
+        zeroPoint = this->z_generator.calibrate();
+        this->z_generator.setZeroPoint(zeroPoint);
+    } else if (pin == PIN_VOLTAGE_LOAD) {
+        zeroPoint = this->z_load.calibrate();
+        this->z_load.setZeroPoint(zeroPoint);
+    } else {
+        return UNKNOWN;
+    }
+    #endif // ARDUINO
 }
 
 bool Hardware::isSimulator() {

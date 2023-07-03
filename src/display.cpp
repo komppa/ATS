@@ -13,6 +13,10 @@ State SettingsStart = State(SETTINGSSTART, &enterSettingsStart, &updateSettingsS
 State SettingsStabilityTime = State(SETTINGSSTABILITYTIME, &enterSettingsStabilityTime, &updateSettingsStabilityTime, &exitSettingsStabilityTime);
 State SettingsSwitchingDelay = State(SETTINGSSWITCHINGDELAY, &enterSwitchingDelay, &updateSwitchingDelay, &exitSwitchingDelay);
 State SettingsWarmUpTime = State(SETTINGSWARMUPTIME, &enterWarmUpTime, &updateWarmUpTime, &exitWarmUpTime);
+
+State SettingsCalibrateZeroVoltage = State(SETTINGSCALIBRATEZEROVOLTAGE, &enterCalibrateZeroVoltage, &updateCalibrateZeroVoltage, &exitCalibrateZeroVoltage);
+State SettingsCalibrateKnownVoltage = State(SETTINGSCALIBRATEKNOWNVOLTAGE, &enterCalibrateKnownVoltage, &updateCalibrateKnownVoltage, &exitCalibrateKnownVoltage);
+
 State SettingsInput = State(SETTINGSINPUT, &enterSettingsInput, &updateSettingsInput, &exitSettingsInput);
 
 
@@ -231,7 +235,7 @@ void enterSettingsStart(FSM* dsm) {
 
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
-        ">>SETTINGS<< 0/3",
+        ">>SETTINGS<< 0/5",
         "Press #- to cycle settings"
     );
 
@@ -317,7 +321,7 @@ void enterSettingsStabilityTime(FSM* dsm) {
 
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
-        "STABILITY TI 1/3",
+        "STABILITY TI 1/5",
         "Change current value \"{3}\" by pressing * or press # to continue to next setting"
     );
 
@@ -349,15 +353,15 @@ void exitSettingsStabilityTime(FSM* dsm) {
 }
 
 /**
- * SWITCHINGDELAY -STATE
+ * SETTINGSSWITCHINGDELAY -STATE
  * 
 */
 void enterSwitchingDelay(FSM* dsm) {
 
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
-        "SWITCH DELAY 2/3",
-        "Press #- to navigate further because this is not implemented yet"
+        "SWITCH DELAY 2/5",
+        "Change current value \"{3}\" by pressing * or press # to continue to next setting"
     );
 
 }
@@ -383,15 +387,15 @@ void exitSwitchingDelay(FSM* dsm) {
 
 
 /**
- * WARMUPTIME -STATE
+ * SETTINGSWARMUPTIME -STATE
  * 
 */
 void enterWarmUpTime(FSM* dsm) {
 
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
-        "WARM UP TIME 3/3",
-        "Press #- to navigate further because this is not implemented yet"
+        "WARM UP TIME 3/5",
+        "Change current value \"{3}\" by pressing * or press # to continue to next setting"
     );
 
 }
@@ -404,9 +408,10 @@ void updateWarmUpTime(FSM* dsm) {
         // ATS FSM should show for DisplayState that there are state
         // state change pending and DisplayState would redraw template
         // again
+        // TODO CRIT GIT remove this since we are not going to DisplayUnknownStart anymore bc we have now also 4/5
         dsm->deps->sm->forceTemplateReDraw();
         
-        dsm->transitionTo(DisplayUnknownStart);
+        dsm->transitionTo(SettingsCalibrateZeroVoltage);
     }
 
     if (key == '*') {
@@ -421,6 +426,58 @@ void exitWarmUpTime(FSM* dsm) {
 
     dsm->deps->writer->clear();
     dsm->deps->writer->setMode(RAW);
+}
+
+
+/**
+ * SETTINGS CALIBRATE ZERO VOLTAGE
+ * 
+*/
+void enterCalibrateZeroVoltage(FSM* dsm) {
+
+    dsm->deps->writer->clear();
+    dsm->deps->writer->write(
+        "CAL 0V LEVEL 4/5",
+        "Press * to calibrate 0V level or press # to continue to next setting"
+    );
+
+}
+
+void updateCalibrateZeroVoltage(FSM* dsm) {
+
+
+
+}
+
+void exitCalibrateZeroVoltage(FSM* dsm) {
+
+
+
+}
+
+
+/**
+ * SETTINGS CALIBRATE KNOWN VOLTAGE
+ * 
+*/
+void enterCalibrateKnownVoltage(FSM* dsm) {
+
+    dsm->deps->writer->clear();
+    dsm->deps->writer->write(
+        "CAL VOLTAGE  5/5",
+        "Press * to calibrate known voltage level or press # to continue to exit settings"
+    );
+
+}
+
+void updateCalibrateKnownVoltage(FSM* dsm) {
+
+
+}
+
+void exitCalibrateKnownVoltage(FSM* dsm) {
+
+
 }
 
 

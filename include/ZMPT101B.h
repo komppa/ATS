@@ -16,6 +16,7 @@ public:
 	int calibrate();
 	void setZeroPoint(int _zero);
 	void setSensitivity(float sens);
+	float getSensitivity(); 
 	float getVoltageDC();
 	float getVoltageAC(uint16_t frequency = 50);
 

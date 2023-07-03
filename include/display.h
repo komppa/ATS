@@ -41,6 +41,14 @@ void enterWarmUpTime(FSM* dsm);
 void updateWarmUpTime(FSM* dsm);
 void exitWarmUpTime(FSM* dsm);
 
+void enterCalibrateZeroVoltage(FSM* dsm);
+void updateCalibrateZeroVoltage(FSM* dsm);
+void exitCalibrateZeroVoltage(FSM* dsm);
+
+void enterCalibrateKnownVoltage(FSM* dsm);
+void updateCalibrateKnownVoltage(FSM* dsm);
+void exitCalibrateKnownVoltage(FSM* dsm);
+
 void enterSettingsInput(FSM* dsm);
 void updateSettingsInput(FSM* dsm);
 void exitSettingsInput(FSM* dsm);
