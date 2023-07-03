@@ -1,6 +1,6 @@
 # ATS - Automatic Transfer Switch
 
-![tests](https://github.com/komppa/ATS/actions/workflows/test.yaml/badge.svg)
+![tests](https://github.com/komppa/ATS/actions/workflows/test_buildnrelease.yaml/badge.svg)
 ![RAM usage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/komppa/df02b7d3aa818b19a80c7f3787f948d7/raw/badges.json)
 ![Flash usage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/komppa/995ca8a8c65a37140d11be684146bee0/raw/badges2.json)
 
