@@ -38,6 +38,8 @@ Since platformio.ini includes two environmets (native & megaatmega2560 for Ardui
 pio run -e megaatmega2560
 ```
 
+Note that before building, pio launches pre python script that takes version of the project from VERSION file on root folder and defines that as definition that we'll use on our code.
+
 ## Sketch about the idea
 
 <br />

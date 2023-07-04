@@ -73,7 +73,7 @@ void setup() {
 
     LOG(INFO, "===============================");
     LOG(INFO, " ATS - Automatic Transfer Switch");
-    LOG(INFO, "       Version: 1.2");
+    LOG(INFO, "       Version: " SW_VERSION);
     LOG(INFO, "   Booting Up... Please Wait.");
     LOG(INFO, "    Crafted with precision by");
     LOG(INFO, "           K&I ENT.");

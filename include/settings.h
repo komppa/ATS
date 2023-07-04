@@ -12,7 +12,6 @@
 #endif  // UNIT_TEST
 
 #define SETTING_MIN_VOLTAGE_THRESHOLD   50
-#define SW_VERSION                      1.00
 
 #define NUM_BUFFER_MAX_LENGTH           10
 

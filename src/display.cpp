@@ -126,7 +126,7 @@ void updateDisplayUnknownStart(FSM *dsm) {
         dsm->deps->writer->write("AUTOMATIC", "TRANSFER SWITCH");
         delay(2000);
         dsm->deps->writer->write(
-            "VERSION " + (String)SW_VERSION,
+            "VERSION " SW_VERSION,
             "K&I ENT."
         );
         delay(1000);
