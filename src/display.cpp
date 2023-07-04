@@ -9,14 +9,15 @@
 State DisplayUnknownStart = State(DISPLAYUNKNOWNSTART, &updateDisplayUnknownStart);
 State DisplayStart = State(DISPLAYSTART, &enterDisplayStart, &updateDisplayStart, &exitDisplayStart);
 State SettingsStart = State(SETTINGSSTART, &enterSettingsStart, &updateSettingsStart, &exitSettingsStart);
+// Settings Timers
 // State SettingsManualDrive = State(SETTINGSMANUALDRIVE, &enterManualDrive, &updateManualDrive, &exitManualDrive);
 State SettingsStabilityTime = State(SETTINGSSTABILITYTIME, &enterSettingsStabilityTime, &updateSettingsStabilityTime, &exitSettingsStabilityTime);
 State SettingsSwitchingDelay = State(SETTINGSSWITCHINGDELAY, &enterSwitchingDelay, &updateSwitchingDelay, &exitSwitchingDelay);
 State SettingsWarmUpTime = State(SETTINGSWARMUPTIME, &enterWarmUpTime, &updateWarmUpTime, &exitWarmUpTime);
-
+// Settings Calibration
 State SettingsCalibrateZeroVoltage = State(SETTINGSCALIBRATEZEROVOLTAGE, &enterCalibrateZeroVoltage, &updateCalibrateZeroVoltage, &exitCalibrateZeroVoltage);
 State SettingsCalibrateKnownVoltage = State(SETTINGSCALIBRATEKNOWNVOLTAGE, &enterCalibrateKnownVoltage, &updateCalibrateKnownVoltage, &exitCalibrateKnownVoltage);
-
+// Settings Input
 State SettingsInput = State(SETTINGSINPUT, &enterSettingsInput, &updateSettingsInput, &exitSettingsInput);
 
 
@@ -431,53 +432,78 @@ void exitWarmUpTime(FSM* dsm) {
 
 /**
  * SETTINGS CALIBRATE ZERO VOLTAGE
- * 
-*/
-void enterCalibrateZeroVoltage(FSM* dsm) {
+ *
+ */
+void enterCalibrateZeroVoltage(FSM *dsm)
+{
 
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
         "CAL 0V LEVEL 4/5",
-        "Press * to calibrate 0V level or press # to continue to next setting"
-    );
-
+        "Press * to set 0V calibration of grid, gen, and load sensors. Press # to continue to next setting");
 }
 
-void updateCalibrateZeroVoltage(FSM* dsm) {
+void updateCalibrateZeroVoltage(FSM *dsm)
+{
 
+    char key = DISPLAY_GET_KEY;
 
+    if (key == '#')
+    {
+        dsm->transitionTo(SettingsCalibrateKnownVoltage);
+    }
 
+    if (key == '*')
+    {
+        // Calibration requested, calibrate all voltage sensors
+        // TODO do not calibrate all sensors, just selected one
+        // TODO get calibration func statuses?
+        dsm->deps->hardware->calibrateZeroVoltage(PIN_VOLTAGE_GRID);
+        dsm->deps->hardware->calibrateZeroVoltage(PIN_VOLTAGE_GENERATOR);
+        dsm->deps->hardware->calibrateZeroVoltage(PIN_VOLTAGE_LOAD);
+        // TODO give some feedback that calibration was done
+    }
 }
 
-void exitCalibrateZeroVoltage(FSM* dsm) {
-
-
-
-}
-
+void exitCalibrateZeroVoltage(FSM *dsm) {}
 
 /**
  * SETTINGS CALIBRATE KNOWN VOLTAGE
- * 
-*/
-void enterCalibrateKnownVoltage(FSM* dsm) {
+ *
+ */
+void enterCalibrateKnownVoltage(FSM *dsm)
+{
 
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
         "CAL VOLTAGE  5/5",
-        "Press * to calibrate known voltage level or press # to continue to exit settings"
-    );
-
+        "Press * to set known voltage for calibration of grid, gen, and load sensors. Press # to continue to next setting");
 }
 
-void updateCalibrateKnownVoltage(FSM* dsm) {
+void updateCalibrateKnownVoltage(FSM *dsm)
+{
 
+    // TODO CRIT know we are calibrating all voltage sensors. That means that input value (current, known voltage)
+    // is used to calibrate all sensors. This is not good. We should calibrate only one sensor at the time and ask
+    // user which sensor to calibrate. This is because we have different calibration values for different sensors.
 
+    char key = DISPLAY_GET_KEY;
+
+    if (key == '#')
+    {
+        dsm->transitionTo(DisplayUnknownStart);
+    }
+
+    if (key == '*')
+    {
+        // Calibration requested, calibrate all voltage sensors but
+        // before that, get known voltage from user
+        dsm->transitionTo(SettingsInput);
+    }
 }
 
-void exitCalibrateKnownVoltage(FSM* dsm) {
-
-
+void exitCalibrateKnownVoltage(FSM *dsm)
+{
 }
 
 
@@ -547,21 +573,32 @@ void enterSettingsInput(FSM* dsm) {
             );
             break;
 
+        case SETTINGSCALIBRATEKNOWNVOLTAGE:
+
+            dsm->deps->settings->add_big_num_buffer(
+                240
+            );
+
+            dsm->deps->writer->write(
+                "Type new value for known voltage and press # to save or press * to cancel without saving",
+                "{3}"
+            );
+            
+            break;
+
         default:
             dsm->transitionTo(DisplayStart);
             break;
-        
-    }
-
+        }
 }
 
-void updateSettingsInput(FSM* dsm) {
+void updateSettingsInput(FSM *dsm) {
 
     char key = DISPLAY_GET_KEY;
     String key_buffer = dsm->deps->settings->get_num_buffer_string();
     String current_input = "";
 
-    // Conditiional template drawing
+    // Conditional template drawing
     switch (dsm->getPreviousState()->getState()) {
 
         case SETTINGSMANUALDRIVE:
@@ -610,6 +647,12 @@ void updateSettingsInput(FSM* dsm) {
             );
             break;
 
+        case SETTINGSCALIBRATEKNOWNVOLTAGE:
+            dsm->deps->writer->variable(
+                SECOND,
+                dsm->deps->settings->get_num_buffer_string());
+            break;
+
         default:
             break;
 
@@ -652,6 +695,22 @@ void updateSettingsInput(FSM* dsm) {
                     // Since there was already two digits, discard them and save
                     // the new one to be possible input. (User can toggle between
                     // 1 and 2 but when the user press # - it'll be saved)
+                    dsm->deps->settings->clear_num_buffer();
+                }
+                dsm->deps->settings->add_num_buffer(number);
+
+                break;
+
+            case SETTINGSCALIBRATEKNOWNVOLTAGE:
+
+                // Since we are getting input for known voltage and it is
+                // represented with three digits, we allow three digits to be inputted
+                // at a time.
+                
+                if (dsm->deps->settings->get_num_buffer()->length >= 3)
+                {
+                    // Since there was already three digits, discard them and save
+                    // the new one to be possible input.
                     dsm->deps->settings->clear_num_buffer();
                 }
                 dsm->deps->settings->add_num_buffer(number);
@@ -711,6 +770,27 @@ void updateSettingsInput(FSM* dsm) {
                     WARM_UP_TIME,
                     dsm->deps->settings->get_num_buffer_int()
                 );
+                break;
+
+            case SETTINGSCALIBRATEKNOWNVOLTAGE:
+                // Calibrate all voltage sensors to the value inputted by the user
+
+                // Grid
+                dsm->deps->hardware->calibrateKnownVoltage(
+                    PIN_VOLTAGE_GRID,
+                    dsm->deps->settings->get_num_buffer_int()
+                );
+                // Generator
+                dsm->deps->hardware->calibrateKnownVoltage(
+                    PIN_VOLTAGE_GENERATOR,
+                    dsm->deps->settings->get_num_buffer_int()
+                );
+                // Load
+                dsm->deps->hardware->calibrateKnownVoltage(
+                    PIN_VOLTAGE_LOAD,
+                    dsm->deps->settings->get_num_buffer_int()
+                );
+
                 break;
 
             default:

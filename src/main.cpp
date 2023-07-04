@@ -71,7 +71,14 @@ void setup() {
 
     Serial.begin(115200);
 
-    LOG(INFO, "Starting ATS - Automatic Transfer Switch");
+    LOG(INFO, "===============================");
+    LOG(INFO, " ATS - Automatic Transfer Switch");
+    LOG(INFO, "       Version: 1.2");
+    LOG(INFO, "   Booting Up... Please Wait.");
+    LOG(INFO, "    Crafted with precision by");
+    LOG(INFO, "           K&I ENT.");
+    LOG(INFO, "===============================");
+    LOG(INFO, "");
 
     LOG(DEBUG, "Initializing LCD");
     lcd.begin(DISPLAY_WIDTH, 2);

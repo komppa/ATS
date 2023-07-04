@@ -83,6 +83,7 @@ int Hardware::getVoltageAC(uint8_t pin) {
     #endif // ARDUINO
 }
 
+// TODO save known voltage calibration value to EEPROM
 int Hardware::calibrateKnownVoltage(uint8_t pin, uint16_t knownVoltage) {
 
     #ifdef ARDUINO
@@ -115,6 +116,7 @@ int Hardware::calibrateKnownVoltage(uint8_t pin, uint16_t knownVoltage) {
     #endif // ARDUINO
 }
 
+// TODO save zero point to EEPROM
 int Hardware::calibrateZeroVoltage(uint8_t pin) {
     #ifdef ARDUINO
     if (digitalRead(PIN_IS_SIMULATOR) == 0) {
