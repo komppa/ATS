@@ -72,9 +72,11 @@ class Hardware {
     private:
         int my_var;
         // For voltage sensors
+        #ifndef UNIT_TEST
         ZMPT101B z_grid;
         ZMPT101B z_generator;
         ZMPT101B z_load;
+        #endif
     public:
         Hardware();
         // Arduino ones

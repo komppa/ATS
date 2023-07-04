@@ -3,11 +3,14 @@
 #include <EEPROM.h>
 #endif // UNIT_TEST
 
-
+#ifndef UNIT_TEST
 Hardware::Hardware()
     : z_grid(PIN_VOLTAGE_GRID),
       z_generator(PIN_VOLTAGE_GENERATOR),
       z_load(PIN_VOLTAGE_LOAD) {}
+#else
+Hardware::Hardware() {}
+#endif // ARDUINO
 
 unsigned long Hardware::time() {
     #ifdef ARDUINO
