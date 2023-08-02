@@ -102,6 +102,9 @@ void setup() {
     pinMode(PIN_VOLTAGE_GRID, INPUT_PULLUP);
     pinMode(PIN_VOLTAGE_GENERATOR, INPUT_PULLUP);
 
+    // Buzzer
+    pinMode(PIN_BUZZER, OUTPUT);
+
     // Init EEPROM
     LOG(DEBUG, "Initializing HW EEPROM");
     hardware.initEEPROM();
@@ -111,6 +114,22 @@ void setup() {
     settings.load(&hardware, &timer);
     LOG(DEBUG, "Loaded settings from EEPROM");
 
+    // Startup sound
+    tone(PIN_BUZZER, 800, 75);
+    delay(75);
+    tone(PIN_BUZZER, 1000, 75);
+    delay(75);
+    tone(PIN_BUZZER, 1200, 75);
+    delay(75);
+    tone(PIN_BUZZER, 1400, 75);
+    delay(75);
+    tone(PIN_BUZZER, 1200, 75);
+    delay(75);
+    tone(PIN_BUZZER, 1000, 75);
+    delay(75);
+    tone(PIN_BUZZER, 800, 150); 
+    delay(150);
+    noTone(PIN_BUZZER);
 
     // Wait a little bit for hardware to settle
     delay(500);

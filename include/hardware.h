@@ -32,6 +32,8 @@
 #define PIN_VOLTAGE_GRID        67  // A13 @2560
 #define PIN_VOLTAGE_GENERATOR   68  // A14 @2560
 #define PIN_VOLTAGE_LOAD        69  // A15 @2560
+// Buzzer
+#define PIN_BUZZER              21
 // Keypad
 #define PIN_KEYPAD_ROW_1        5
 #define PIN_KEYPAD_ROW_2        4
