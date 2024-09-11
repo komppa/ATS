@@ -6,9 +6,7 @@ WORKDIR /home/ci/app
 
 RUN apt update
 
-RUN apt install -y python3-full python3-pip curl jq
-
-RUN pip3 install -U platformio
+RUN apt install -y python3 python3-pip python3-platformio curl jq
 
 COPY entrypoint.sh /.
 COPY entrypointRelease.sh /.
