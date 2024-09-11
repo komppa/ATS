@@ -8,7 +8,7 @@ RUN apt update
 
 RUN apt install -y python3 python3-pip curl jq
 
-RUN pip3 install platformio
+RUN pip3 install --break-system-packages platformio
 
 COPY entrypoint.sh /.
 COPY entrypointRelease.sh /.
