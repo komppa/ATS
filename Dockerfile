@@ -2,6 +2,8 @@
 
 FROM ubuntu
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 WORKDIR /home/ci/app
 
 RUN apt update
