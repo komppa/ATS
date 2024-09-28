@@ -8,6 +8,10 @@ Import("env")
 
 version = open('VERSION', 'r').read().strip()
 
+# For future (eeprom migration) purposes, here is the version number
+# in hash format. 5 chars.
+version_hash = str(abs(hash(version)))[:5]
+
 env.Append(CPPDEFINES=[
     ("SW_VERSION", "\\\"{}\\\"".format(version))
 ])
