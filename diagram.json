@@ -14,7 +14,7 @@
     },
     { "type": "wokwi-lcd1602", "id": "lcd", "top": 8, "left": 20, "attrs": {} },
     { "type": "wokwi-resistor", "id": "r1", "top": 140, "left": 220, "attrs": { "value": "220" } },
-    { "type": "wokwi-slide-switch", "id": "sw1", "top": 96.51, "left": 468.02, "attrs": {} },
+    { "type": "wokwi-slide-switch", "id": "sw1", "top": 96.51, "left": 468.02, "attrs": { "value": "1" } },
     { "type": "wokwi-slide-switch", "id": "sw2", "top": 97.54, "left": 507.59, "attrs": {} },
     {
       "type": "wokwi-led",
