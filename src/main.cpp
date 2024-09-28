@@ -15,6 +15,7 @@
 #include "display.h"
 #include "settings.h"
 #include "logger.h"
+#include "sound.h"
 
 
 // Display contacts: VSS=GND, VDD=5V, RW=GND, A=5V(VIA 220OHM RESISTOR), K=GND 
@@ -76,7 +77,7 @@ void setup() {
     LOG(INFO, "       Version: " SW_VERSION);
     LOG(INFO, "   Booting Up... Please Wait.");
     LOG(INFO, "    Crafted with precision by");
-    LOG(INFO, "           K&I ENT.");
+    LOG(INFO, "    Komppa (github.com/komppa)");
     LOG(INFO, "===============================");
     LOG(INFO, "");
 
@@ -114,22 +115,8 @@ void setup() {
     settings.load(&hardware, &timer);
     LOG(DEBUG, "Loaded settings from EEPROM");
 
-    // Startup sound
-    tone(PIN_BUZZER, 800, 75);
-    delay(75);
-    tone(PIN_BUZZER, 1000, 75);
-    delay(75);
-    tone(PIN_BUZZER, 1200, 75);
-    delay(75);
-    tone(PIN_BUZZER, 1400, 75);
-    delay(75);
-    tone(PIN_BUZZER, 1200, 75);
-    delay(75);
-    tone(PIN_BUZZER, 1000, 75);
-    delay(75);
-    tone(PIN_BUZZER, 800, 150); 
-    delay(150);
-    noTone(PIN_BUZZER);
+    // Play a starup sound
+    // startup_sound();
 
     // Wait a little bit for hardware to settle
     delay(500);
@@ -141,27 +128,6 @@ void loop() {
 
     // Limiter
     delay(100);
-
-    if (settings.get_override().active) {
-        LOG(DEBUG, "Override mode active");
-        // Display the override message on the LCD
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("MANUAL-SRC:GRID");
-        lcd.setCursor(0, 1);
-        lcd.print("EXIT MAN:PRS KEY");
-        
-        // Wait for key press to deactivate override mode
-        char key = keypad.getKey();
-        if (key) {
-            // Deactivate override mode by saying the source is automatic
-            settings.set_override_source(AUTOMATIC);
-            lcd.clear();
-        }
-        
-        // Return early so the FSM is not updated while in override mode
-        return;
-    }
 
     // Regular updates
     timer.update();
