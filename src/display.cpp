@@ -10,7 +10,7 @@ State DisplayUnknownStart = State(DISPLAYUNKNOWNSTART, &updateDisplayUnknownStar
 State DisplayStart = State(DISPLAYSTART, &enterDisplayStart, &updateDisplayStart, &exitDisplayStart);
 State SettingsStart = State(SETTINGSSTART, &enterSettingsStart, &updateSettingsStart, &exitSettingsStart);
 // Settings Timers
-// State SettingsManualDrive = State(SETTINGSMANUALDRIVE, &enterManualDrive, &updateManualDrive, &exitManualDrive);
+State SettingsManualDrive = State(SETTINGSMANUALDRIVE, &enterManualDrive, &updateManualDrive, &exitManualDrive);
 State SettingsStabilityTime = State(SETTINGSSTABILITYTIME, &enterSettingsStabilityTime, &updateSettingsStabilityTime, &exitSettingsStabilityTime);
 State SettingsSwitchingDelay = State(SETTINGSSWITCHINGDELAY, &enterSwitchingDelay, &updateSwitchingDelay, &exitSwitchingDelay);
 State SettingsWarmUpTime = State(SETTINGSWARMUPTIME, &enterWarmUpTime, &updateWarmUpTime, &exitWarmUpTime);
@@ -250,7 +250,7 @@ void updateSettingsStart(FSM* dsm) {
         // DISABLED - manual drive is not implemented completely
         // dsm->transitionTo(SettingsManualDrive);
 
-        dsm->transitionTo(SettingsStabilityTime);
+        dsm->transitionTo(SettingsManualDrive);
     }
 
     if (key == '*') {
@@ -281,14 +281,12 @@ void exitSettingsStart(FSM* dsm) {}
  * MANUALDRIVE -STATE
  * 
 */
-/*
 void enterManualDrive(FSM* dsm) {
 
     dsm->deps->writer->clear();
-    dsm->deps->writer->setMode(MIDDLE);
     dsm->deps->writer->write(
-        "MANUAL DRIVE 1/4",
-        "Press #- to navigate further or press * to select manual input source"
+        "MAN OVERDRVE 1/6",
+        "Activate manual overdrive with * or press # to continue to next setting"
     );
 
 }
@@ -296,13 +294,13 @@ void enterManualDrive(FSM* dsm) {
 void updateManualDrive(FSM* dsm) {
 
     char key = DISPLAY_GET_KEY;
+    String key_buffer = "";
 
     if (key == '#') {
         dsm->transitionTo(SettingsStabilityTime);
     }
 
     if (key == '*') {
-        // We are going to input manual input source
         dsm->transitionTo(SettingsInput);
     }
 
@@ -312,7 +310,7 @@ void exitManualDrive(FSM* dsm) {
     // Flush key buffer to avoid old keypresses in other states
     dsm->deps->settings->clear_num_buffer();
 }
-*/
+
 
 /**
  * SETTINGSSTABILITYTIME -STATE
@@ -322,7 +320,7 @@ void enterSettingsStabilityTime(FSM* dsm) {
 
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
-        "STABILITY TI 1/5",
+        "STABILITY TI 2/6",
         "Change current value \"{3}\" by pressing * or press # to continue to next setting"
     );
 
@@ -361,7 +359,7 @@ void enterSwitchingDelay(FSM* dsm) {
 
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
-        "SWITCH DELAY 2/5",
+        "SWITCH DELAY 3/6",
         "Change current value \"{3}\" by pressing * or press # to continue to next setting"
     );
 
@@ -370,6 +368,11 @@ void enterSwitchingDelay(FSM* dsm) {
 void updateSwitchingDelay(FSM* dsm) {
 
     char key = DISPLAY_GET_KEY;
+
+    dsm->deps->writer->variable(
+        SECOND,
+        (String)dsm->deps->timer->get_remaining_time(SWITCHING_DELAY)
+    );
 
     if (key == '#') {
         dsm->transitionTo(SettingsWarmUpTime);
@@ -395,7 +398,7 @@ void enterWarmUpTime(FSM* dsm) {
 
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
-        "WARM UP TIME 3/5",
+        "WARM UP TIME 4/6",
         "Change current value \"{3}\" by pressing * or press # to continue to next setting"
     );
 
@@ -404,6 +407,11 @@ void enterWarmUpTime(FSM* dsm) {
 void updateWarmUpTime(FSM* dsm) {
 
     char key = DISPLAY_GET_KEY;
+
+    dsm->deps->writer->variable(
+        SECOND,
+        (String)dsm->deps->timer->get_remaining_time(WARM_UP_TIME)
+    );
 
     if (key == '#') {
         // ATS FSM should show for DisplayState that there are state
@@ -439,7 +447,7 @@ void enterCalibrateZeroVoltage(FSM *dsm)
 
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
-        "CAL 0V LEVEL 4/5",
+        "CAL 0V LEVEL 5/6",
         "Press * to set 0V calibration of grid, gen, and load sensors. Press # to continue to next setting");
 }
 
@@ -476,7 +484,7 @@ void enterCalibrateKnownVoltage(FSM *dsm)
 
     dsm->deps->writer->clear();
     dsm->deps->writer->write(
-        "CAL VOLTAGE  5/5",
+        "CAL VOLTAGE  6/6",
         "Press * to set known voltage for calibration of grid, gen, and load sensors. Press # to continue to next setting");
 }
 
@@ -530,7 +538,7 @@ void enterSettingsInput(FSM* dsm) {
             // source, 3 = AUTO
             // NOTE no need to implement if manual drive is "blocking" action
             dsm->deps->writer->write(
-                "Type new value for manual source and press # to save or press * to cancel without saving. 1 = GRID and 2 = GENERATOR",
+                "Type new value for instant manual source or press * to cancel back to AUTO. 1 = GRID and 2 = GENERATOR",
                 "{3}"
             );
             break;
@@ -539,7 +547,7 @@ void enterSettingsInput(FSM* dsm) {
 
             // Get current stability time from timer
             dsm->deps->settings->add_big_num_buffer(
-                dsm->deps->timer->get_initial_time(STABILITY_TIME)
+                dsm->deps->timer->get_initial_time(STABILITY_TIME)  // Gets the init time without down ticked time
             );
             
             // Draw template
@@ -676,7 +684,7 @@ void updateSettingsInput(FSM *dsm) {
                 if (dsm->deps->settings->get_num_buffer()->length != 0) {
                     // Since there was already a digit(s), discard them and save
                     // the new one to be possible input. (User can toggle between
-                    // 1 and 2 but when the user press # - it'll be saved)
+                    // 1 and 2)
                     dsm->deps->settings->clear_num_buffer();
                 }
                 dsm->deps->settings->add_num_buffer(number);
@@ -727,30 +735,11 @@ void updateSettingsInput(FSM *dsm) {
         switch (dsm->getPreviousState()->getState()) {
 
             case SETTINGSMANUALDRIVE:
-                
-                // When save button is pressed on input state:
-                // 1) save new value if entered
-                // 2) move back to showing setting 1/4 where we came from
-                dsm->deps->settings->commit_setting(
-                    // Hardware for accessing EEPROM
-                    dsm->deps->hardware,
-                    // NOTE: we are not telling that we are on input state but
-                    // we are telling that we are on the state where we came from
-                    // to distinguish between different settings.
-                    dsm->getPreviousState()->getState(),
-                    // Raw first digit integer
-                    dsm->deps->settings->get_num_buffer()->buffer[0]
-                );
-
-                // By telling that override is active, we are ignoring state machine
-                // and just using override source. If the override source is set to
-                // AUTO (3), then we are not raising override flag to interrupt the
-                // ATS state machine.
-                dsm->deps->settings->set_override_source(
-                    (enum source)dsm->deps->settings->get_num_buffer()->buffer[0]
-                );
+                // Doing nothing since we do not allow manual drive to be active "in background".
+                // When setting page is active, only then override source can be used. When navigating
+                // away from settings page, override source is set to AUTO.
                 break;
-
+                
             case SETTINGSSTABILITYTIME:
                 dsm->deps->timer->set_timer(
                     STABILITY_TIME,
@@ -800,8 +789,7 @@ void updateSettingsInput(FSM *dsm) {
         dsm->deps->settings->commit_setting(
             dsm->deps->hardware,
             dsm->getPreviousState()->getState(),
-            // TODO CRIT (but works) cast from 'int*' to 'uint8_t {aka unsigned char}' loses precision [-fpermissive]
-            *(dsm->deps->settings->get_num_buffer()->buffer)
+            dsm->deps->settings->get_num_buffer_int()
         );
 
         // TODO this is not optimal place to switch contactors
@@ -822,6 +810,13 @@ void updateSettingsInput(FSM *dsm) {
     }
 
     if (key == '*') {
+
+        // If we were on manual drive setting, we should go back to
+        // AUTO mode before exiting settings
+        if (dsm->getPreviousState()->getState() == SETTINGSMANUALDRIVE) {
+            dsm->deps->settings->set_override_source(AUTOMATIC);
+        }
+
         // Cancel pressed, go back wherever you came from
         // by using getter of previous state.
         dsm->transitionTo(
