@@ -51,6 +51,10 @@ int Timer::get_remaining_time(TimerSelection timer) {
     }
 }
 
+/**
+ * Returns the start time for each timer, without any modifications
+ * (like ticking down the time).
+ */
 int Timer::get_initial_time(TimerSelection timer) {
     switch (timer) {
         case STABILITY_TIME:

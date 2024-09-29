@@ -2,13 +2,15 @@
 
 FROM ubuntu
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 WORKDIR /home/ci/app
 
 RUN apt update
 
 RUN apt install -y python3 python3-pip curl jq
 
-RUN pip3 install -U platformio
+RUN pip3 install --break-system-packages platformio
 
 COPY entrypoint.sh /.
 COPY entrypointRelease.sh /.

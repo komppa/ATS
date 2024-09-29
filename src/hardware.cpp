@@ -160,8 +160,6 @@ int Hardware::initEEPROM() {
         // Check if EEPROM has been initialized
         if (EEPROM.read(EEPROM_INIT_ADDRESS) != EEPROM_INITIALIZED) {
 
-            Serial.println("Initializing EEPROM");
-
             // By default, source is AUTO (3), not grid (1) or generator (2)
             EEPROM.write(EEPROM_ADDRESS_SOURCE, 3);
 
